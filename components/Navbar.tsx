@@ -11,6 +11,8 @@ import { useCartWishlistStore } from "@/store/useCartWishlistStore";
 import { getCartCount } from "@/actions/cart";
 import { getWishlistCount } from "@/actions/wishlist";
 
+import { useGuestWishlistStore } from "@/store/useGuestWishlistStore";
+
 const navLinks = [
   { path: "/", label: "Home" },
   { path: "/products", label: "Products" },
@@ -38,16 +40,21 @@ export default function Navbar() {
   }, []);
 
   const { cartCount, wishlistCount, setCartCount, setWishlistCount } = useCartWishlistStore();
+  const guestWishlist = useGuestWishlistStore();
 
   useEffect(() => {
+    // Cart count: works for both auth & guest (server handles cookies)
+    getCartCount().then(setCartCount);
+
     if (isAuthenticated) {
-      getCartCount().then(setCartCount);
+      // Logged-in: wishlist from DB
       getWishlistCount().then(setWishlistCount);
     } else {
-      setCartCount(0);
-      setWishlistCount(0);
+      // Guest: wishlist from localStorage
+      guestWishlist.hydrate();
+      setWishlistCount(guestWishlist.slugs.length);
     }
-  }, [isAuthenticated, setCartCount, setWishlistCount]);
+  }, [isAuthenticated, setCartCount, setWishlistCount, guestWishlist.slugs.length]);
 
   useEffect(() => {
     const handleScroll = () => {

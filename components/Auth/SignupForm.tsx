@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, CheckCircle, Circle, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -19,12 +19,14 @@ export default function SignupForm() {
   const router = useRouter();
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [viewingPolicies, setViewingPolicies] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { setAuthModalView, closeAuthModal, setOtpEmail } = useAuthStore();
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<signupFormType>({
     resolver: zodResolver(signupformSchema),
@@ -70,8 +72,11 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-[520px] mx-auto pb-6 sm:pb-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="relative overflow-hidden p-5 sm:p-8 md:p-10 pt-10 sm:pt-12">
+    <div className="w-full max-w-[520px] mx-auto relative">
+      
+      {/* Form View */}
+      <div className={`w-full pb-6 sm:pb-8 animate-in fade-in zoom-in-95 duration-300 ${viewingPolicies ? 'hidden' : 'block'}`}>
+        <form onSubmit={handleSubmit(onSubmit)} className="relative overflow-hidden p-5 sm:p-8 md:p-10 pt-10 sm:pt-12">
 
         {/* Subtle Decorative Background Elements */}
         <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
@@ -170,6 +175,81 @@ export default function SignupForm() {
                 </button>
               </div>
               {errors.password && <p className={`${textFont.className} text-red-500 text-xs mt-1.5 pl-1`}>{errors.password.message}</p>}
+
+              {/* Password Strength Indicator */}
+              {watch("password") && (
+                <div className="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className={`${textFont.className} font-semibold text-gray-500`}>Password Strength</span>
+                    <span className={`${textFont.className} font-bold ${
+                      [
+                        (watch("password") || "").length >= 8,
+                        /[A-Z]/.test(watch("password") || ""),
+                        /[a-z]/.test(watch("password") || ""),
+                        /[0-9]/.test(watch("password") || "")
+                      ].filter(Boolean).length === 4 ? "text-green-500" :
+                      [
+                        (watch("password") || "").length >= 8,
+                        /[A-Z]/.test(watch("password") || ""),
+                        /[a-z]/.test(watch("password") || ""),
+                        /[0-9]/.test(watch("password") || "")
+                      ].filter(Boolean).length >= 2 ? "text-yellow-500" : "text-red-500"
+                    }`}>
+                      {
+                        [
+                          (watch("password") || "").length >= 8,
+                          /[A-Z]/.test(watch("password") || ""),
+                          /[a-z]/.test(watch("password") || ""),
+                          /[0-9]/.test(watch("password") || "")
+                        ].filter(Boolean).length === 4 ? "Strong" :
+                        [
+                          (watch("password") || "").length >= 8,
+                          /[A-Z]/.test(watch("password") || ""),
+                          /[a-z]/.test(watch("password") || ""),
+                          /[0-9]/.test(watch("password") || "")
+                        ].filter(Boolean).length >= 2 ? "Good" : "Weak"
+                      }
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-1 h-1.5">
+                    {[1, 2, 3, 4].map((level) => {
+                      const score = [
+                        (watch("password") || "").length >= 8,
+                        /[A-Z]/.test(watch("password") || ""),
+                        /[a-z]/.test(watch("password") || ""),
+                        /[0-9]/.test(watch("password") || "")
+                      ].filter(Boolean).length;
+                      
+                      let color = "bg-red-500";
+                      if (score >= 3) color = "bg-yellow-500";
+                      if (score === 4) color = "bg-green-500";
+
+                      return (
+                        <div 
+                          key={level} 
+                          className={`flex-1 rounded-full transition-colors duration-300 ${score >= level ? color : 'bg-gray-200'}`}
+                        />
+                      );
+                    })}
+                  </div>
+                  
+                  <div className={`${textFont.className} text-[10px] sm:text-xs text-gray-500 grid grid-cols-2 gap-1.5 pt-1`}>
+                    <div className={`flex items-center gap-1.5 transition-colors ${((watch("password") || "").length >= 8) ? 'text-green-600' : ''}`}>
+                      {((watch("password") || "").length >= 8) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} 8+ characters
+                    </div>
+                    <div className={`flex items-center gap-1.5 transition-colors ${(/[A-Z]/.test(watch("password") || "")) ? 'text-green-600' : ''}`}>
+                      {(/[A-Z]/.test(watch("password") || "")) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Uppercase
+                    </div>
+                    <div className={`flex items-center gap-1.5 transition-colors ${(/[a-z]/.test(watch("password") || "")) ? 'text-green-600' : ''}`}>
+                      {(/[a-z]/.test(watch("password") || "")) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Lowercase
+                    </div>
+                    <div className={`flex items-center gap-1.5 transition-colors ${(/[0-9]/.test(watch("password") || "")) ? 'text-green-600' : ''}`}>
+                      {(/[0-9]/.test(watch("password") || "")) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Number
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Confirm */}
@@ -196,7 +276,7 @@ export default function SignupForm() {
                 <div className="w-2.5 h-2.5 rounded-sm bg-[#dbba53]" />
               </div>
               <span className={`${textFont.className} text-xs sm:text-sm text-gray-500 leading-relaxed`}>
-                I agree to the <Link href="/policies#terms" onClick={() => closeAuthModal()} className="text-[#c25b5e] hover:text-[#15161b] transition-colors font-semibold">Terms</Link> and <Link href="/policies" onClick={() => closeAuthModal()} className="text-[#c25b5e] hover:text-[#15161b] transition-colors font-semibold">Policies</Link>
+                I agree to the <button type="button" onClick={(e) => { e.preventDefault(); setViewingPolicies(true); }} className="text-[#c25b5e] hover:text-[#15161b] transition-colors font-semibold">Terms and Policies</button>
               </span>
             </label>
 
@@ -225,6 +305,50 @@ export default function SignupForm() {
           Sign In
         </button>
       </p>
+      </div>
+
+      {/* Policies View */}
+      <div className={`w-full p-6 sm:p-8 md:p-10 pt-10 sm:pt-12 bg-white animate-in fade-in zoom-in-95 duration-300 ${viewingPolicies ? 'block' : 'hidden'}`}>
+        <button 
+          type="button" 
+          onClick={(e) => { e.preventDefault(); setViewingPolicies(false); }} 
+          className="flex items-center gap-2 text-gray-500 hover:text-[#15161b] transition-colors mb-8"
+        >
+          <ArrowLeft size={16} /> <span className={`${textFont.className} font-semibold uppercase tracking-wider text-sm`}>Back to Sign Up</span>
+        </button>
+        
+        <div className="space-y-6">
+          <h3 className={`${titleFont.className} text-xl sm:text-2xl uppercase tracking-wide text-[#15161b] mb-6`}>Terms & Conditions</h3>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>1. Use of Website</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>By accessing orake.in, you agree to use the site for lawful purposes only. You may not misuse, copy, or redistribute any content without written permission.</p>
+            </div>
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>2. Product Information</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>All product descriptions, nutritional claims, and images are for informational purposes. ORAKE products are food/beverages and are not intended to diagnose or treat any medical condition.</p>
+            </div>
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>3. Orders & Pricing</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>ORAKE reserves the right to update prices at any time. Orders are confirmed only after payment is received. We reserve the right to cancel orders in case of pricing errors or stock issues.</p>
+            </div>
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>4. Intellectual Property</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>All brand assets, logos, and content on this website are the property of ORAKE. Unauthorized use is strictly prohibited.</p>
+            </div>
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>5. Limitation of Liability</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>ORAKE is not liable for any indirect or incidental losses arising from the use of our products or website, beyond the value of the original purchase.</p>
+            </div>
+            <div>
+              <h4 className={`${textFont.className} font-bold text-sm sm:text-base text-[#15161b] mb-1.5`}>6. Governing Law</h4>
+              <p className={`${textFont.className} text-sm text-gray-600 leading-relaxed`}>These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in Bhubaneswar, Odisha, India.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

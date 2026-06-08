@@ -8,13 +8,16 @@ import Testimonials from "@/components/Home/Testimonials";
  
  
 
-import { getFeaturedProducts } from "@/lib/data/product";
+import { getOrders } from "@/lib/data/order";
 
 export default async function Home() {
+  const ordersData = await getOrders();
+  const pastOrdersCount = ordersData.total || 0;
+
   return (
     <div className="min-h-screen bg-white overflow-x-clip w-full relative">
       <HeroSection />
-      <CollectionsSection  />
+      <CollectionsSection pastOrdersCount={pastOrdersCount} />
       <TaglineBanner />
       <SmoothieShowcaseSection />
       <EnergyDrinksDealBanner />      

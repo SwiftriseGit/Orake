@@ -7,6 +7,10 @@ import { titleFont, textFont } from "@/lib/fonts";
 import { authClient } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/useAuthStore";
 
+import { syncGuestWishlist } from "@/actions/wishlist";
+import { syncGuestCartToUser } from "@/actions/cart";
+import { useGuestWishlistStore } from "@/store/useGuestWishlistStore";
+
 export default function VerifyOTPForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -77,6 +81,14 @@ export default function VerifyOTPForm() {
       if (error) {
         toast.error(error.message || "Invalid OTP. Please try again.");
       } else {
+        // Sync guest data → user account (wishlist + cart)
+        const guestSlugs = useGuestWishlistStore.getState().getSlugs();
+        await Promise.all([
+          guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
+          syncGuestCartToUser(),
+        ]);
+        useGuestWishlistStore.getState().clear();
+
         toast.success("Email verified! Signing you in...");
         closeAuthModal();
         router.push("/");

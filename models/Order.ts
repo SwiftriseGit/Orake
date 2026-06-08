@@ -2,7 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import { OrderItemSchema, IOrderItem } from "./OrderItem";
 
 export interface IOrder {
-    userId: mongoose.Schema.Types.ObjectId;
+    userId?: mongoose.Schema.Types.ObjectId;
+    guestEmail?: string;
     orderItems: IOrderItem[];
     shippingAddress: {
         fullName: string;
@@ -33,8 +34,12 @@ export interface IOrder {
 const OrderSchema = new Schema<IOrder>({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: "User"
+    },
+    guestEmail: {
+        type: String,
+        required: false
     },
     orderItems: [OrderItemSchema],
     shippingAddress: {

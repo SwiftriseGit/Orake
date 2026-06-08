@@ -34,8 +34,10 @@ function NewsletterForm() {
   );
 }
 
-export default function CollectionsSection() {
+export default function CollectionsSection({ pastOrdersCount = 1 }: { pastOrdersCount?: number }) {
  
+  const isFirstOrder = pastOrdersCount === 0;
+  const displayPrice = isFirstOrder ? "80.00" : "85.00";
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -168,7 +170,7 @@ export default function CollectionsSection() {
               </h3>
               <div className={`${bodyFont.className} flex flex-row items-center justify-between gap-2`}>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. 85.00</span>
+                  <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. {displayPrice}</span>
                   <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
                 </div>
 
@@ -228,7 +230,7 @@ export default function CollectionsSection() {
               </h3>
               <div className={`${bodyFont.className} flex flex-row items-center justify-between gap-2`}>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. 85.00</span>
+                  <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. {displayPrice}</span>
                   <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
                 </div>
 
@@ -246,3 +248,4 @@ export default function CollectionsSection() {
     </section>
   );
 }
+

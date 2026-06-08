@@ -25,20 +25,47 @@ export async function processWaitlistCheckout(total: number) {
 
     // Send email to admin
     await sendWaitlistEmail({
-      name: session.user.name ,
+      name: session.user.name,
       email: session.user.email,
+      phone: (session.user as any).phone,
       cartItems: items,
       total: total
     });
 
-    // Optionally clear the cart here if desired.
-    // For a waitlist, we can leave it or clear it. Leaving it for now so they don't lose it if they actually want to see it later.
-    // If you want to clear it, uncomment:
-    // await clearCart();
-
     return { success: true };
   } catch (error: any) {
     console.error("Waitlist checkout error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function processGuestWaitlistCheckout(data: {
+  name: string;
+  email: string;
+  phone: string;
+  total: number;
+}) {
+  try {
+    // Get the guest's cart
+    const cartRes = await getCart();
+    const items = cartRes?.items;
+
+    if (!items || items.length === 0) {
+      throw new Error("Cart is empty");
+    }
+
+    // Send email to admin
+    await sendWaitlistEmail({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      cartItems: items,
+      total: data.total
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Guest waitlist checkout error:", error);
     return { success: false, error: error.message };
   }
 }

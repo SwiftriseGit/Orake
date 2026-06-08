@@ -28,8 +28,14 @@ async function CheckoutContent() {
     pastOrdersCount = ordersData.total;
   }
 
+  // Pass down session status to the client
   return (
-    <CheckoutForm initialCartItems={cartData?.items || []} user={session?.user || null} initialAddresses={addresses} pastOrdersCount={pastOrdersCount} />
+    <CheckoutForm 
+        initialCartItems={cartData?.items || []} 
+        user={session?.user || null} 
+        initialAddresses={addresses} 
+        pastOrdersCount={pastOrdersCount} 
+    />
   );
 }
 

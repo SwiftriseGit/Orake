@@ -64,7 +64,16 @@ export async function sendOTPEmail(
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending OTP email:", err);
+        reject(err);
+      } else {
+        resolve(info);
+      }
+    });
+  });
 }
 
 export async function sendContactEmail(data: {
@@ -97,7 +106,16 @@ export async function sendContactEmail(data: {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending contact email:", err);
+        reject(err);
+      } else {
+        resolve(info);
+      }
+    });
+  });
 }
 
 export async function sendPartnerEmail(data: {
@@ -136,12 +154,22 @@ export async function sendPartnerEmail(data: {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending partner email:", err);
+        reject(err);
+      } else {
+        resolve(info);
+      }
+    });
+  });
 }
 
 export async function sendWaitlistEmail(data: {
   name: string;
   email: string;
+  phone?: string;
   cartItems: any[];
   total: number;
 }) {
@@ -158,6 +186,7 @@ export async function sendWaitlistEmail(data: {
         <div style="background: #ffffff; padding: 20px; border-radius: 8px;">
           <p><strong>Customer Name:</strong> ${data.name}</p>
           <p><strong>Customer Email:</strong> ${data.email}</p>
+          <p><strong>Customer Phone:</strong> ${data.phone || 'N/A'}</p>
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
           <p><strong>Cart Items:</strong></p>
           <ul>
@@ -169,5 +198,14 @@ export async function sendWaitlistEmail(data: {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending waitlist email:", err);
+        reject(err);
+      } else {
+        resolve(info);
+      }
+    });
+  });
 }

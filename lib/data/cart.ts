@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 import { Cart } from "@/models/Cart";
 import "@/models/Product";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 
 async function getSession() {
   const reqHeaders = await headers();
@@ -15,10 +15,14 @@ export async function getCart() {
   await headers();
   try {
     const session = await getSession();
-    if (!session?.user) return null;
+    const cookieStore = await cookies();
+    const guestId = cookieStore.get("guestId")?.value;
+
+    if (!session?.user && !guestId) return { items: [] };
 
     await connectDB();
-    const cart = await Cart.findOne({ userId: session.user.id }).populate('items.productId').lean();
+    const query = session?.user ? { userId: session.user.id } : { guestId };
+    const cart = await Cart.findOne(query).populate('items.productId').lean();
     
     if (!cart) return { items: [] };
 
@@ -47,9 +51,13 @@ export async function getCartCount(): Promise<number> {
   await headers();
   try {
     const session = await getSession();
-    if (!session?.user) return 0;
+    const cookieStore = await cookies();
+    const guestId = cookieStore.get("guestId")?.value;
+
+    if (!session?.user && !guestId) return 0;
     await connectDB();
-    const cart = await Cart.findOne({ userId: session.user.id });
+    const query = session?.user ? { userId: session.user.id } : { guestId };
+    const cart = await Cart.findOne(query);
     if (!cart) return 0;
     return cart.items.length;
   } catch {

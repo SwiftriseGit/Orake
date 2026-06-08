@@ -41,8 +41,20 @@ export default function CartList({ initialItems: items, pastOrdersCount = 0 }: {
     }
   };
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const savings = items.reduce((sum, i) => {
+  const isFirstOrder = pastOrdersCount === 0;
+
+  const displayItems = items.map(i => {
+    if (isFirstOrder && i.oldPrice) {
+      return {
+        ...i,
+        price: Math.round(i.oldPrice * 0.8)
+      };
+    }
+    return i;
+  });
+
+  const subtotal = displayItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const savings = displayItems.reduce((sum, i) => {
     if (i.oldPrice && i.oldPrice > i.price) {
       return sum + (i.oldPrice - i.price) * i.qty;
     }
@@ -58,7 +70,7 @@ export default function CartList({ initialItems: items, pastOrdersCount = 0 }: {
         {/* Cart Items */}
         <div className="flex-1">
           <div className="space-y-4">
-            {items.map(item => (
+            {displayItems.map(item => (
               <CartItem key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} />
             ))}
           </div>

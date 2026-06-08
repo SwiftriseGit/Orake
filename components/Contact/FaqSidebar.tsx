@@ -24,17 +24,7 @@ export default function FaqSidebar() {
         </button>
       </div>
 
-      {/* Light Phone Card */}
-      <div className="bg-[#f0f0f2] rounded-[2rem] p-8 flex items-center gap-6 shadow-sm border border-white">
-        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
-          <PhoneCall className="text-[#dbba53] w-7 h-7" />
-        </div>
-        <div>
-          <p className={`${textFont.className} text-gray-500 text-sm font-bold mb-1 uppercase tracking-widest`}>Don't like typing?</p>
-          <p className={`${titleFont.className} text-2xl font-bold text-[#15161b] mb-1 uppercase tracking-wide`}>Call The Hotline</p>
-          <p className={`${textFont.className} text-gray-500 text-lg`}>+1 (800) ORAKE-UP</p>
-        </div>
-      </div>
+
     </div>
   );
 }

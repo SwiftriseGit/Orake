@@ -25,11 +25,12 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
   const [selectedAddressId, setSelectedAddressId] = useState<string>(
     initialAddresses.find((a: any) => a.isDefault)?._id || initialAddresses[0]?._id || "new"
   );
-  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(!user && initialAddresses.length === 0);
 
   // Form state for new address
   const [newAddressForm, setNewAddressForm] = useState({
     fullName: user?.name || "",
+    email: user?.email || "",
     phone: "",
     street: "",
     city: "",
@@ -38,18 +39,24 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
     country: "India"
   });
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!user) {
-      router.push("/?auth=login&redirect=/checkout");
-    }
-  }, [user, router]);
-
   const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' or 'Razorpay'
 
   const handleAddNewAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
+
+    if (!user) {
+      // For guests, we don't save the address to the database
+      const tempId = "guest_" + Date.now();
+      const newAddr = { ...newAddressForm, _id: tempId };
+      setAddresses(prev => [...prev, newAddr]);
+      setSelectedAddressId(tempId);
+      setIsAddressModalOpen(false);
+      setNewAddressForm({ fullName: "", email: "", phone: "", street: "", city: "", state: "", postalCode: "", country: "India" });
+      setProcessing(false);
+      return;
+    }
+
     try {
       const res = await addAddress({ ...newAddressForm, isDefault: addresses.length === 0 });
       if (res.success) {
@@ -57,7 +64,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
         setSelectedAddressId(res.address._id);
         toast.success("Address added");
         setIsAddressModalOpen(false);
-        setNewAddressForm({ fullName: user?.name || "", phone: "", street: "", city: "", state: "", postalCode: "", country: "India" });
+        setNewAddressForm({ fullName: user?.name || "", email: user?.email || "", phone: "", street: "", city: "", state: "", postalCode: "", country: "India" });
       } else {
         toast.error(res.error || "Failed to add address");
       }
@@ -158,7 +165,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
           },
           prefill: {
             name: selectedAddress.fullName,
-            email: user.email,
+            email: selectedAddress.email || user?.email || "",
             contact: selectedAddress.phone
           },
           theme: {
@@ -193,20 +200,25 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
     }
   };
 
-  if (!user) {
-    return <div className="flex justify-center items-center py-40 min-h-screen"><Loader2 className="animate-spin text-[#c25b5e]" size={40} /></div>;
-  }
-
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const originalSubtotal = cartItems.reduce((sum, item) => sum + (item.oldPrice || item.price) * item.qty, 0);
-  
   const isFirstTime = pastOrdersCount === 0;
-  const targetRate = isFirstTime ? 0.80 : 0.85;
-  const targetTotal = Math.round(originalSubtotal * targetRate);
-  const autoDiscount = Math.max(0, subtotal - targetTotal);
 
-  const shipping = (subtotal - autoDiscount) > 999 ? 0 : 99;
-  const total = (subtotal - autoDiscount) + shipping;
+  const displayItems = cartItems.map(i => {
+    if (isFirstTime && i.oldPrice) {
+      return {
+        ...i,
+        price: Math.round(i.oldPrice * 0.8)
+      };
+    }
+    return i;
+  });
+
+  const subtotal = displayItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const originalSubtotal = displayItems.reduce((sum, item) => sum + (item.oldPrice || item.price) * item.qty, 0);
+  
+  const autoDiscount = 0; // Removed, now factored into item price
+
+  const shipping = subtotal > 999 ? 0 : 99;
+  const total = subtotal + shipping;
 
   return (
     <div className="max-w-6xl mx-auto px-6 lg:px-20 py-12 md:py-20">
@@ -299,7 +311,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
             </h2>
             
             <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#c25b5e transparent' }}>
-              {cartItems.map((item) => (
+              {displayItems.map((item) => (
                 <div key={item.id} className="flex justify-between items-start text-sm">
                   <div className="flex gap-3">
                     <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center p-1 shrink-0">
@@ -320,12 +332,6 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
                 <span>Subtotal</span>
                 <span>Rs. {subtotal.toFixed(2)}</span>
               </div>
-              {autoDiscount > 0 && (
-                <div className="flex justify-between text-[#dbba53]">
-                  <span>FIRST TIME EXTRA OFF</span>
-                  <span>-Rs. {autoDiscount.toFixed(2)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-gray-300">
                 <span>Shipping</span>
                 <span>{shipping === 0 ? "FREE" : `Rs. ${shipping.toFixed(2)}`}</span>
@@ -341,7 +347,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
 
       <OrderSuccessModal 
         isOpen={isSuccessModalOpen}
-        onClose={() => router.push("/account")}
+        onClose={() => router.push(user ? "/account" : "/")}
         orderId={successOrderId || "unknown"}
         paymentMethod={paymentMethod}
       />
@@ -359,10 +365,15 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
             </div>
             
             <form onSubmit={handleAddNewAddress} className="space-y-4">
+              <div>
+                <label className={`${textFont.className} block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2`}>Full Name</label>
+                <input required type="text" name="fullName" value={newAddressForm.fullName} onChange={handleInputChange} className={`${textFont.className} w-full border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15161b] focus:border-[#c25b5e] focus:bg-white focus:outline-none transition-all rounded-xl`} />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={`${textFont.className} block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2`}>Full Name</label>
-                  <input required type="text" name="fullName" value={newAddressForm.fullName} onChange={handleInputChange} className={`${textFont.className} w-full border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15161b] focus:border-[#c25b5e] focus:bg-white focus:outline-none transition-all rounded-xl`} />
+                  <label className={`${textFont.className} block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2`}>Email Address</label>
+                  <input required type="email" name="email" value={newAddressForm.email} onChange={handleInputChange} className={`${textFont.className} w-full border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15161b] focus:border-[#c25b5e] focus:bg-white focus:outline-none transition-all rounded-xl`} />
                 </div>
                 <div>
                   <label className={`${textFont.className} block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2`}>Phone Number</label>

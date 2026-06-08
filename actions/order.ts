@@ -24,12 +24,12 @@ interface ShippingAddress {
     country: string;
 }
 
-export async function placeOrder(shippingAddress: ShippingAddress, paymentMethod: string) {
+export async function placeOrder(shippingAddress: ShippingAddress & { email?: string }, paymentMethod: string) {
   try {
     const session = await getSession();
-    if (!session?.user) throw new Error("Unauthorized");
+    // We no longer throw Unauthorized. We allow guests.
 
-    // Get the user's cart
+    // Get the user's cart (which now correctly uses session or guest cookie)
     const cartRes = await getCart();
     const items = cartRes?.items;
 
@@ -39,14 +39,28 @@ export async function placeOrder(shippingAddress: ShippingAddress, paymentMethod
 
     await connectDB();
 
-    // Check past orders to determine discount
-    const orderCountQuery = {
-      userId: session.user.id,
-      $nor: [
-        { paymentMethod: 'Razorpay', isPaid: false, status: 'Pending' }
-      ]
-    };
-    const pastOrdersCount = await Order.countDocuments(orderCountQuery);
+    // Determine past orders count for discount
+    let pastOrdersCount = 0;
+    
+    if (session?.user) {
+      const orderCountQuery = {
+        userId: session.user.id,
+        $nor: [
+          { paymentMethod: 'Razorpay', isPaid: false, status: 'Pending' }
+        ]
+      };
+      pastOrdersCount = await Order.countDocuments(orderCountQuery);
+    } else if (shippingAddress.email) {
+      // If guest, use their email to check past orders
+      const orderCountQuery = {
+        guestEmail: shippingAddress.email,
+        $nor: [
+          { paymentMethod: 'Razorpay', isPaid: false, status: 'Pending' }
+        ]
+      };
+      pastOrdersCount = await Order.countDocuments(orderCountQuery);
+    }
+
     const isFirstTime = pastOrdersCount === 0;
     const targetRate = isFirstTime ? 0.80 : 0.85;
 
@@ -74,7 +88,8 @@ export async function placeOrder(shippingAddress: ShippingAddress, paymentMethod
 
     // Create the order in MongoDB
     const order = new Order({
-        userId: session.user.id,
+        userId: session?.user?.id,
+        guestEmail: !session?.user ? shippingAddress.email : undefined,
         orderItems,
         shippingAddress,
         paymentMethod,
@@ -98,7 +113,7 @@ export async function placeOrder(shippingAddress: ShippingAddress, paymentMethod
             id: rzpOrder.id, // We store the Razorpay Order ID here
             status: rzpOrder.status,
             update_time: new Date().toISOString(),
-            email_address: session.user.email
+            email_address: session?.user?.email || shippingAddress.email || ""
         };
     }
 
@@ -110,7 +125,9 @@ export async function placeOrder(shippingAddress: ShippingAddress, paymentMethod
     }
 
     // Return the required info to the frontend
-    revalidatePath("/account");
+    if (session?.user) {
+      revalidatePath("/account");
+    }
     revalidatePath("/cart");
 
     return {
@@ -192,15 +209,12 @@ export async function cancelOrder(id: string) {
 
 export async function deleteAbandonedOrder(id: string) {
   try {
-    const session = await getSession();
-    if (!session?.user) return { success: false, error: "Unauthorized" };
-
     await connectDB();
     
-    const order = await Order.findOne({ _id: id, userId: session.user.id });
+    const order = await Order.findById(id);
     if (!order) return { success: false, error: "Order not found" };
     
-    // Only allow deleting if it's a pending Razorpay order
+    // Only allow deleting if it's a pending Razorpay order that was never paid
     if (order.paymentMethod === "Razorpay" && order.status === "Pending" && !order.isPaid) {
       await Order.findByIdAndDelete(id);
       return { success: true };

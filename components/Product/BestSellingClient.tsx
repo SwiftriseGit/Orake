@@ -10,7 +10,7 @@ import { textFont } from "@/lib/fonts";
 
 
 const categoryTabs = ['All', 'New Drops', 'Sale'];
-export default function BestSellingClient({ initialProducts, initialWishlistSlugs }: { initialProducts: ProductType[], initialWishlistSlugs: string[] }) {
+export default function BestSellingClient({ initialProducts, initialWishlistSlugs, pastOrdersCount = 1 }: { initialProducts: ProductType[], initialWishlistSlugs: string[], pastOrdersCount?: number }) {
 	const [activeTab, setActiveTab] = useState('All');
 
 
@@ -30,6 +30,8 @@ export default function BestSellingClient({ initialProducts, initialWishlistSlug
 			transition: { type: "spring", stiffness: 150, damping: 15 } as any
 		}
 	};
+
+	const isFirstOrder = pastOrdersCount === 0;
 
 	return (
 		<div className="min-h-screen bg-white">
@@ -80,7 +82,7 @@ export default function BestSellingClient({ initialProducts, initialWishlistSlug
 							<div className="grid grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto gap-x-10 md:gap-x-16 gap-y-24 md:gap-y-28 pt-6 md:pt-10 justify-items-center">
 								{initialProducts.map((product, index) => (
 									<motion.div key={index} variants={itemVariants} className="w-full max-w-[340px]">
-										<ProductCard product={product} isWishlist={initialWishlistSlugs.includes(product._id)} />
+										<ProductCard product={product} isWishlist={initialWishlistSlugs.includes(product._id)} isFirstOrder={isFirstOrder} />
 									</motion.div>
 								))}
 							</div>

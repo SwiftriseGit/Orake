@@ -48,29 +48,29 @@ export default function CartItem({ item, onUpdateQty, onRemove }: CartItemProps)
             
             <button 
               onClick={() => onRemove(item.id)} 
-              className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-[#de3e4f] hover:bg-red-50 transition-all rounded-full shrink-0 mt-[-4px] mr-[-4px]"
+              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-[#de3e4f] bg-red-50 hover:bg-red-100 transition-colors rounded-full shrink-0 mt-[-4px] mr-[-4px]"
               aria-label="Remove item"
             >
-              <Trash2 size={14} />
+              <Trash2 size={15} />
             </button>
           </div>
 
           {/* Bottom: Qty & Price */}
           <div className="flex items-end justify-between mt-4 sm:mt-auto">
             {/* Quantity Controls */}
-            <div className="flex items-center bg-[#f4f4f5] rounded-full p-0.5">
+            <div className="flex items-center border border-gray-200 rounded-full bg-white h-8 sm:h-9">
               <button 
                 onClick={() => onUpdateQty(item.id, -1)} 
-                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-500 hover:text-[#15161b] hover:bg-white rounded-full transition-all shadow-sm"
+                className="w-8 sm:w-9 h-full flex items-center justify-center text-gray-400 hover:text-[#15161b] hover:bg-gray-50 rounded-l-full transition-colors"
               >
                 <Minus size={12} strokeWidth={2.5} />
               </button>
-              <span className={`${textFont.className} text-[#15161b] font-bold text-xs sm:text-sm w-7 sm:w-8 text-center tabular-nums`}>
+              <span className={`${textFont.className} text-[#15161b] font-bold text-xs sm:text-sm w-6 sm:w-8 text-center tabular-nums`}>
                 {item.qty}
               </span>
               <button 
                 onClick={() => onUpdateQty(item.id, 1)} 
-                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-500 hover:text-[#15161b] hover:bg-white rounded-full transition-all shadow-sm"
+                className="w-8 sm:w-9 h-full flex items-center justify-center text-gray-400 hover:text-[#15161b] hover:bg-gray-50 rounded-r-full transition-colors"
               >
                 <Plus size={12} strokeWidth={2.5} />
               </button>

@@ -21,9 +21,8 @@ export default function ContactInfoSidebar() {
             <h4 className={`${textFont.className} font-bold text-base uppercase tracking-wider`}>HQ</h4>
           </div>
           <p className={`${textFont.className} text-white/60 text-sm pl-[3.25rem] leading-relaxed`}>
-            Building No./Flat No.: E House No. 011, EWS 20<br />
-            KRUPANILAYAM SRIT PLOT, Near Railway Station Road<br />
-            Bargarh Industrial Estate<br />
+            E House No.-011, S.R.I.T Plot<br />
+            Railway Station Road, Industrial Area<br />
             Bargarh, Odisha 768028
           </p>
         </div>
@@ -39,7 +38,7 @@ export default function ContactInfoSidebar() {
             <h4 className={`${textFont.className} font-bold text-base uppercase tracking-wider`}>Direct Line</h4>
           </div>
           <div className="pl-[3.25rem] space-y-1">
-            <p className={`${textFont.className} text-lg font-medium tracking-wide`}>+1 (800) ORAKE-UP</p>
+            <p className={`${textFont.className} text-lg font-medium tracking-wide`}>+91 63709 99393</p>
             <p className={`${textFont.className} text-sm text-white/60`}>contact@drinkorake.com</p>
           </div>
         </div>
@@ -55,8 +54,8 @@ export default function ContactInfoSidebar() {
             <h4 className={`${textFont.className} font-bold text-base uppercase tracking-wider`}>Hours</h4>
           </div>
           <div className="pl-[3.25rem] space-y-0.5">
-            <p className={`${textFont.className} text-sm text-white/60`}>Mon – Fri: 9AM – 7PM IST</p>
-            <p className={`${textFont.className} text-sm text-white/60`}>Sat – Sun: 10AM – 4PM IST</p>
+            <p className={`${textFont.className} text-sm text-white/60`}>Mon – Fri: 10:00 AM – 4:00 PM IST</p>
+            <p className={`${textFont.className} text-sm text-white/60`}>Sat: 10:00 AM – 1:00 PM IST</p>
           </div>
         </div>
       </div>

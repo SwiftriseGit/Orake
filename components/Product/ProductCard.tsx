@@ -10,40 +10,52 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSession } from "@/lib/auth-client";
 import { useCartWishlistStore } from "@/store/useCartWishlistStore";
+import { useGuestWishlistStore } from "@/store/useGuestWishlistStore";
 import { ProductType } from "@/models/Product"
 
 interface ProductCardProps {
     product: ProductType;
-    isWishlist: boolean
+    isWishlist: boolean;
+    isFirstOrder?: boolean;
 }
 
 import Link from "next/link";
 import { headingFont, bodyFont } from "@/lib/fonts";
 import { StarRating } from "./StarRating";
 
-export default function ProductCard({ product, isWishlist }: ProductCardProps) {
+export default function ProductCard({ product, isWishlist, isFirstOrder = false }: ProductCardProps) {
 
     const cardBgColor = "bg-[#f4f4f5]";
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
 
-
+    // Calculate dynamic pricing based on first order status
+    // If it's the first order, we give 20% discount instead of the standard 15% (or db discount).
+    const displayDiscount = isFirstOrder ? 20 : product.discount;
+    const displayPrice = isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price;
 
     const { openAuthModal } = useAuthStore();
     const { data: session } = useSession();
 
     const { incrementCart, incrementWishlist, decrementWishlist } = useCartWishlistStore();
+    const guestWishlist = useGuestWishlistStore();
+
+    // Resolve wishlist state: server data for logged-in, localStorage for guests
+    const [localIsWishlisted, setLocalIsWishlisted] = useState(isWishlist);
+
+    useEffect(() => {
+        if (!session?.user) {
+            guestWishlist.hydrate();
+            setLocalIsWishlisted(guestWishlist.has(product.slug));
+        } else {
+            setLocalIsWishlisted(isWishlist);
+        }
+    }, [session?.user, isWishlist, product.slug, guestWishlist.slugs]);
 
 
     const handleAddToCart = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-
-        if (!session?.user) {
-            toast.error("Please login to add items to your cart");
-            openAuthModal("login");
-            return;
-        }
 
         setIsAddingToCart(true);
         const res = await addToCart(product._id, 1);
@@ -60,24 +72,40 @@ export default function ProductCard({ product, isWishlist }: ProductCardProps) {
         e.preventDefault();
         e.stopPropagation();
 
+        // Guest user → localStorage wishlist
         if (!session?.user) {
-            toast.error("Please login to manage your wishlist");
-            openAuthModal("login");
+            const added = guestWishlist.toggle(product.slug);
+            setLocalIsWishlisted(added);
+            if (added) {
+                incrementWishlist();
+            } else {
+                decrementWishlist();
+            }
             return;
         }
 
+        // Logged-in user → server DB wishlist
+        const wasWishlisted = localIsWishlisted;
+        setLocalIsWishlisted(!wasWishlisted);
+        wasWishlisted ? decrementWishlist() : incrementWishlist();
+
         setIsLiking(true);
-
-
         const res = await toggleWishlist(product._id);
         setIsLiking(false);
+
+        // Defensively remove from guest storage just in case
+        if (guestWishlist.has(product.slug)) {
+            guestWishlist.toggle(product.slug);
+        }
 
         if (!res.success) {
             toast.error(res.error || "Failed to update wishlist");
         } else {
             if (res.added) {
+                setLocalIsWishlisted(true);
                 incrementWishlist();
             } else {
+                setLocalIsWishlisted(false);
                 decrementWishlist();
             }
         }
@@ -102,11 +130,11 @@ export default function ProductCard({ product, isWishlist }: ProductCardProps) {
 
 
                         {/* Badge Top-Left (Discount) */}
-                        {product.discount > 0 && (
+                        {displayDiscount > 0 && (
                             <div
                                 className={`${bodyFont.className} absolute top-4 left-4 sm:top-6 sm:left-6 z-20 rounded-lg px-2.5 py-1 text-[10px] sm:text-[11px] font-bold tracking-[0.15em] text-white shadow-sm bg-[#c25b5e]`}
                             >
-                                -{product.discount}%
+                                -{displayDiscount}%
                             </div>
                         )}
 
@@ -114,12 +142,12 @@ export default function ProductCard({ product, isWishlist }: ProductCardProps) {
                         <button
                             onClick={handleToggleWishlist}
                             disabled={isLiking}
-                            className={`absolute top-4 right-4 sm:top-6 sm:right-6 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-90 ${isWishlist
+                            className={`absolute top-4 right-4 sm:top-6 sm:right-6 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all active:scale-90 ${localIsWishlisted
                                 ? "bg-[#c25b5e] text-white shadow-md"
                                 : "bg-white/80 text-gray-400 hover:text-[#c25b5e] hover:bg-white shadow-sm"
                                 }`}
                         >
-                            <Heart size={16} strokeWidth={2} fill={isWishlist ? "currentColor" : "none"} />
+                            <Heart size={16} strokeWidth={2} fill={localIsWishlisted ? "currentColor" : "none"} />
                         </button>
 
                         {/* ── The Popping Out Image (shadow closer to can) ── */}
@@ -164,7 +192,7 @@ export default function ProductCard({ product, isWishlist }: ProductCardProps) {
                                     </span>
                                 )}
                                 <span className="text-xl sm:text-2xl font-black text-[#15161b] leading-none">
-                                    Rs. {product.price.toFixed(2)}
+                                    Rs. {displayPrice.toFixed(2)}
                                 </span>
                             </div>
 

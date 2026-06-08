@@ -15,6 +15,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { titleFont, textFont } from "@/lib/fonts";
 
 
+import { syncGuestWishlist } from "@/actions/wishlist";
+import { syncGuestCartToUser } from "@/actions/cart";
+import { useGuestWishlistStore } from "@/store/useGuestWishlistStore";
+
+
 export default function LoginForm() {
   const router = useRouter();
   const [showPass, setShowPass] = useState(false);
@@ -56,9 +61,16 @@ export default function LoginForm() {
         return;
       }
 
+      // Sync guest data → user account (wishlist + cart)
+      const guestSlugs = useGuestWishlistStore.getState().getSlugs();
+      await Promise.all([
+        guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
+        syncGuestCartToUser(),
+      ]);
+      useGuestWishlistStore.getState().clear();
+
       toast.success("Welcome back!");
       closeAuthModal();
-      // Check if user was redirected from a protected route
       const redirectUrl = new URLSearchParams(window.location.search).get("redirect");
       router.push(redirectUrl || "/");
       router.refresh();

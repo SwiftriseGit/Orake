@@ -14,9 +14,10 @@ import { ProductType } from "@/models/Product"
 interface WishlistCardProps {
   item: ProductType,
   onRemove: (id: string) => void;
+  isFirstOrder?: boolean;
 }
 
-export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
+export default function WishlistCard({ item, onRemove, isFirstOrder = false }: WishlistCardProps) {
   const [isAdding, setIsAdding] = useState(false);
 
   const { incrementCart } = useCartWishlistStore();
@@ -32,6 +33,8 @@ export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
       toast.error(res.error || "Failed to add to cart");
     }
   };
+
+  const displayPrice = isFirstOrder && item.oldPrice ? Math.round(item.oldPrice * 0.8) : item.price;
 
   return (
     <div className="group bg-white border border-gray-100 rounded-[1.5rem] overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all relative">
@@ -63,9 +66,9 @@ export default function WishlistCard({ item, onRemove }: WishlistCardProps) {
           <h3 className={`${textFont.className} text-[#15161b] text-base font-bold uppercase tracking-wide mb-3 leading-tight group-hover:text-[#c25b5e] transition-colors`}>{item.name}</h3>
 
           <div className="flex items-center gap-2">
-            <span className={`${textFont.className} text-[#15161b] text-xl font-black`}>Rs. {item.price}</span>
-            {item.oldPrice && (
-              <span className={`${textFont.className} text-gray-400 text-sm line-through`}>Rs. {item.oldPrice}</span>
+            <span className={`${textFont.className} text-[#15161b] text-xl font-black`}>Rs. {displayPrice.toFixed(2)}</span>
+            {item.oldPrice > 0 && (
+              <span className={`${textFont.className} text-gray-400 text-sm line-through`}>Rs. {item.oldPrice.toFixed(2)}</span>
             )}
           </div>
         </div>

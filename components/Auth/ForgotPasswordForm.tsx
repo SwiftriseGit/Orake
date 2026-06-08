@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Mail, ArrowLeft, CheckCircle, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, Lock, Eye, EyeOff, Loader2, Circle } from "lucide-react";
 import { titleFont, textFont } from "@/lib/fonts";
 import { useAuthStore } from "@/store/useAuthStore";
 import { authClient } from "@/lib/auth-client";
@@ -222,6 +222,81 @@ export default function ForgotPasswordForm() {
                     {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {password && (
+                  <div className="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className={`${textFont.className} font-semibold text-gray-500`}>Password Strength</span>
+                      <span className={`${textFont.className} font-bold ${
+                        [
+                          password.length >= 8,
+                          /[A-Z]/.test(password),
+                          /[a-z]/.test(password),
+                          /[0-9]/.test(password)
+                        ].filter(Boolean).length === 4 ? "text-green-500" :
+                        [
+                          password.length >= 8,
+                          /[A-Z]/.test(password),
+                          /[a-z]/.test(password),
+                          /[0-9]/.test(password)
+                        ].filter(Boolean).length >= 2 ? "text-yellow-500" : "text-red-500"
+                      }`}>
+                        {
+                          [
+                            password.length >= 8,
+                            /[A-Z]/.test(password),
+                            /[a-z]/.test(password),
+                            /[0-9]/.test(password)
+                          ].filter(Boolean).length === 4 ? "Strong" :
+                          [
+                            password.length >= 8,
+                            /[A-Z]/.test(password),
+                            /[a-z]/.test(password),
+                            /[0-9]/.test(password)
+                          ].filter(Boolean).length >= 2 ? "Good" : "Weak"
+                        }
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-1 h-1.5">
+                      {[1, 2, 3, 4].map((level) => {
+                        const score = [
+                          password.length >= 8,
+                          /[A-Z]/.test(password),
+                          /[a-z]/.test(password),
+                          /[0-9]/.test(password)
+                        ].filter(Boolean).length;
+                        
+                        let color = "bg-red-500";
+                        if (score >= 3) color = "bg-yellow-500";
+                        if (score === 4) color = "bg-green-500";
+
+                        return (
+                          <div 
+                            key={level} 
+                            className={`flex-1 rounded-full transition-colors duration-300 ${score >= level ? color : 'bg-gray-200'}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    
+                    <div className={`${textFont.className} text-[10px] sm:text-xs text-gray-500 grid grid-cols-2 gap-1.5 pt-1`}>
+                      <div className={`flex items-center gap-1.5 transition-colors ${(password.length >= 8) ? 'text-green-600' : ''}`}>
+                        {(password.length >= 8) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} 8+ characters
+                      </div>
+                      <div className={`flex items-center gap-1.5 transition-colors ${(/[A-Z]/.test(password)) ? 'text-green-600' : ''}`}>
+                        {(/[A-Z]/.test(password)) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Uppercase
+                      </div>
+                      <div className={`flex items-center gap-1.5 transition-colors ${(/[a-z]/.test(password)) ? 'text-green-600' : ''}`}>
+                        {(/[a-z]/.test(password)) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Lowercase
+                      </div>
+                      <div className={`flex items-center gap-1.5 transition-colors ${(/[0-9]/.test(password)) ? 'text-green-600' : ''}`}>
+                        {(/[0-9]/.test(password)) ? <CheckCircle size={12} className="text-green-500" /> : <Circle size={12} className="text-gray-300" />} Number
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button

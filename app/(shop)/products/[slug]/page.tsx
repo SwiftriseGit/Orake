@@ -12,6 +12,8 @@ import { bodyFont } from "@/lib/fonts";
 
 import { Suspense } from "react";
 
+import { getOrders } from "@/lib/data/order";
+
 async function ProductDetailsContent({ params }: { params: Promise<{ slug: string }> }) {
     const resolvedParams = await params;
     const { slug } = resolvedParams;
@@ -21,9 +23,11 @@ async function ProductDetailsContent({ params }: { params: Promise<{ slug: strin
         return notFound();
     }
 
-    // Fetch product reviews and wishlist status
+    // Fetch product reviews, wishlist status, and orders
     const wishlistItems = await getUserWishlist();
     const reviews = await getProductReviews(product._id);
+    const ordersData = await getOrders();
+    const isFirstOrder = ordersData.total === 0;
     
     const isWishlisted = wishlistItems.includes(product._id.toString());
 
@@ -47,7 +51,7 @@ async function ProductDetailsContent({ params }: { params: Promise<{ slug: strin
                 <ProductGallery galleryImages={galleryImages} productName={product.name} />
 
                 {/* RIGHT: Product Info */}
-                <ProductInfo product={product} relatedProduct={relatedProduct} initialIsWishlisted={isWishlisted} />
+                <ProductInfo product={product} relatedProduct={relatedProduct} initialIsWishlisted={isWishlisted} isFirstOrder={isFirstOrder} />
             </div>
 
             {/* Bottom Info Tabs */}

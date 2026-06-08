@@ -6,15 +6,20 @@ export interface ICartItem {
 }
 
 export interface ICart {
-    userId: Types.ObjectId;
+    userId?: Types.ObjectId;
+    guestId?: string;
     items: ICartItem[];
 }
 
 const CartSchema = new Schema<ICart>({
     userId: {
         type: Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: "User"
+    },
+    guestId: {
+        type: String,
+        required: false
     },
     items: [
         {

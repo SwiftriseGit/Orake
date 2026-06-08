@@ -8,7 +8,7 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { processWaitlistCheckout } from "@/actions/waitlist";
+import { processWaitlistCheckout, processGuestWaitlistCheckout } from "@/actions/waitlist";
 
 interface OrderSummaryProps {
   subtotal: number;
@@ -22,44 +22,65 @@ interface OrderSummaryProps {
 export default function OrderSummary({ subtotal, savings, total, itemsQty, pastOrdersCount, onPaymentSuccess }: OrderSummaryProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+
   const { openAuthModal } = useAuthStore();
   const { data: session } = useSession();
   const user = session?.user;
   const router = useRouter();
 
-  const isFirstTime = pastOrdersCount === 0;
   const originalSubtotal = subtotal + savings;
-  
-  // First time buyers pay 80% of original (20% off)
-  // Returning buyers pay 85% of original (15% off)
-  const targetRate = isFirstTime ? 0.80 : 0.85;
-  const targetTotal = Math.round(originalSubtotal * targetRate);
-  
-  // Auto discount is the extra amount needed to reach the target total
-  const autoDiscount = Math.max(0, subtotal - targetTotal);
-  const discountLabel = "FIRST TIME EXTRA OFF";
-
-  const finalTotal = Math.max(0, total - autoDiscount);
+  const finalTotal = subtotal;
   const isValidCheckout = itemsQty >= 2;
 
   const handleCheckout = async () => {
     if (!isValidCheckout) return;
+    
     if (!user) {
-      toast.error("Please login to complete your order");
-      openAuthModal("login");
+      // openAuthModal(); // Commented out as requested
+      setShowGuestModal(true);
       return;
     }
-        // router.push(`/checkout`);
+
+    // router.push(`/checkout`); // Commented out as requested
+    
     setIsProcessing(true);
     const res = await processWaitlistCheckout(finalTotal);
     setIsProcessing(false);
-
+    
     if (res.success) {
       setShowModal(true);
     } else {
-      toast.error("Failed to process your request. Please try again.");
+      toast.error(res.error || "Something went wrong.");
     }
-    //------
+  };
+
+  const handleGuestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guestName || !guestEmail || !guestPhone) {
+      toast.error("Please fill in all details");
+      return;
+    }
+    
+    setIsProcessing(true);
+    const res = await processGuestWaitlistCheckout({
+      name: guestName,
+      email: guestEmail,
+      phone: guestPhone,
+      total: finalTotal
+    });
+    setIsProcessing(false);
+    
+    if (res.success) {
+      setShowGuestModal(false);
+      setShowModal(true);
+    } else {
+      toast.error(res.error || "Something went wrong.");
+    }
   };
 
   return (
@@ -87,26 +108,12 @@ export default function OrderSummary({ subtotal, savings, total, itemsQty, pastO
             </div>
           )}
 
-          {autoDiscount > 0 && (
-            <div className="flex justify-between items-baseline">
-              <span className={`${textFont.className} text-[#dbba53] text-sm sm:text-base flex items-center gap-1.5`}>
-                <Percent size={14} /> Extra Discount
-              </span>
-              <div className="text-right">
-                <span className={`${textFont.className} text-[#dbba53] text-[10px] block mb-0.5 uppercase tracking-widest`}>{discountLabel}</span>
-                <span className={`${textFont.className} text-[#dbba53] text-sm sm:text-base font-semibold`}>
-                  -₹{autoDiscount.toFixed(0)}
-                </span>
-              </div>
-            </div>
-          )}
-
           <div className="h-px bg-white/10 !mt-5" />
 
           <div className="flex justify-between items-end !mt-5">
             <span className={`${textFont.className} text-white text-base sm:text-lg font-bold uppercase tracking-widest mb-1`}>Total</span>
             <div className="text-right flex flex-col items-end">
-              {(savings > 0 || autoDiscount > 0) && (
+              {(savings > 0) && (
                 <span className={`${textFont.className} text-gray-400 text-sm sm:text-base line-through mb-1 decoration-[#c25b5e] decoration-2`}>
                   ₹{originalSubtotal.toFixed(0)}
                 </span>
@@ -128,15 +135,15 @@ export default function OrderSummary({ subtotal, savings, total, itemsQty, pastO
             </p>
           </div>
         )}
-        <button 
+        <button
           onClick={handleCheckout}
           disabled={isProcessing || !isValidCheckout}
           className={`${textFont.className} w-full bg-[#c25b5e] hover:bg-[#de3e4f] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl text-base font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:shadow-[0_8px_25px_rgba(194,91,94,0.35)] active:scale-[0.98] flex items-center justify-center gap-3`}
         >
           {isProcessing ? (
-             <><Loader2 size={20} className="animate-spin" /> Processing...</>
+            <><Loader2 size={20} className="animate-spin" /> Processing...</>
           ) : (
-             <>Checkout <ArrowRight size={20} /></>
+            <>Checkout <ArrowRight size={20} /></>
           )}
         </button>
 
@@ -158,7 +165,7 @@ export default function OrderSummary({ subtotal, savings, total, itemsQty, pastO
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-[#15161b] border border-[#c25b5e]/30 rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in fade-in zoom-in duration-300">
-            <button 
+            <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
             >
@@ -181,6 +188,68 @@ export default function OrderSummary({ subtotal, savings, total, itemsQty, pastO
                 Got it, Thanks!
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guest Waitlist Form Modal */}
+      {showGuestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#15161b] border border-[#c25b5e]/30 rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in fade-in zoom-in duration-300">
+            <button
+              onClick={() => setShowGuestModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+            >
+              <X size={24} />
+            </button>
+            <div className="text-center mb-6">
+              <h2 className={`${titleFont.className} text-2xl text-white uppercase tracking-wide`}>
+                Join The Waitlist
+              </h2>
+              <p className={`${textFont.className} text-gray-400 text-sm mt-2`}>
+                We're launching soon. Drop your details to reserve your cart.
+              </p>
+            </div>
+            
+            <form onSubmit={handleGuestSubmit} className="space-y-4">
+              <div>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Full Name"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className={`${textFont.className} w-full bg-[#f4f4f5] text-[#15161b] px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#c25b5e] outline-none transition-all placeholder:text-gray-400`}
+                />
+              </div>
+              <div>
+                <input 
+                  type="email" 
+                  required
+                  placeholder="Email Address"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  className={`${textFont.className} w-full bg-[#f4f4f5] text-[#15161b] px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#c25b5e] outline-none transition-all placeholder:text-gray-400`}
+                />
+              </div>
+              <div>
+                <input 
+                  type="tel" 
+                  required
+                  placeholder="Phone Number"
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  className={`${textFont.className} w-full bg-[#f4f4f5] text-[#15161b] px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#c25b5e] outline-none transition-all placeholder:text-gray-400`}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isProcessing}
+                className={`${textFont.className} w-full mt-2 bg-[#c25b5e] hover:bg-[#de3e4f] disabled:opacity-50 text-white py-4 rounded-xl text-sm font-bold uppercase tracking-[0.1em] transition-all duration-300 flex items-center justify-center`}
+              >
+                {isProcessing ? <Loader2 size={20} className="animate-spin" /> : "Submit Details"}
+              </button>
+            </form>
           </div>
         </div>
       )}

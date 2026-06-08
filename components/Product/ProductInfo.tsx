@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { headingFont, bodyFont } from "@/lib/fonts";
 import { StarRating } from "./StarRating";
 import { useCartWishlistStore } from "@/store/useCartWishlistStore";
+import { useGuestWishlistStore } from "@/store/useGuestWishlistStore";
 import { toggleWishlist } from "@/actions/wishlist";
 import { addToCart } from "@/actions/cart";
 import { authClient } from "@/lib/auth-client";
@@ -34,9 +35,10 @@ interface ProductInfoProps {
     image: { publicId?: string; url: string } | string;
   };
   initialIsWishlisted?: boolean;
+  isFirstOrder?: boolean;
 }
 
-export default function ProductInfo({ product, relatedProduct, initialIsWishlisted = false }: ProductInfoProps) {
+export default function ProductInfo({ product, relatedProduct, initialIsWishlisted = false, isFirstOrder = false }: ProductInfoProps) {
   const session = authClient.useSession();
   const isAuthenticated = !!session.data?.user;
   const { openAuthModal } = useAuthStore();
@@ -49,41 +51,58 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
   const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
 
   const { setWishlistCount, setCartCount, incrementWishlist, decrementWishlist, incrementCart } = useCartWishlistStore();
+  const guestWishlist = useGuestWishlistStore();
   
   const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      guestWishlist.hydrate();
+      setIsWishlisted(guestWishlist.has(product.slug));
+    } else {
       setIsWishlisted(initialIsWishlisted);
-  }, [initialIsWishlisted]);
+    }
+  }, [initialIsWishlisted, isAuthenticated, product.slug, guestWishlist.slugs]);
 
   const handleToggleWishlist = async () => {
+    // Guest user → localStorage wishlist
     if (!isAuthenticated) {
-      openAuthModal("login");
+      const added = guestWishlist.toggle(product.slug);
+      setIsWishlisted(added);
+      if (added) {
+        incrementWishlist();
+      } else {
+        decrementWishlist();
+      }
       return;
     }
 
+    // Logged-in user → server DB wishlist
     try {
       setIsWishlistLoading(true);
-      // Optimistic update
       const prevState = isWishlisted;
       setIsWishlisted(!prevState);
 
       const result = await toggleWishlist(product._id);
+      
+      // Defensively remove from guest storage just in case
+      if (guestWishlist.has(product.slug)) {
+          guestWishlist.toggle(product.slug);
+      }
+
       if (result.success) {
         if (result.added) {
             incrementWishlist();
-            toast.success("Added to wishlist");
         } else {
             decrementWishlist();
-            toast.success("Removed from wishlist");
         }
       } else {
-        setIsWishlisted(prevState); // Revert
+        setIsWishlisted(prevState);
         toast.error(result.error || "Failed to update wishlist");
       }
     } catch (error) {
       console.error(error);
-      setIsWishlisted(!isWishlisted); // Revert
+      setIsWishlisted(!isWishlisted);
       toast.error("An error occurred");
     } finally {
       setIsWishlistLoading(false);
@@ -91,17 +110,12 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
   };
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      openAuthModal("login");
-      return;
-    }
 
     try {
       setIsCartLoading(true);
       const result = await addToCart(product._id, quantity);
       if (result.success) {
         if (result.isNewItem) incrementCart();
-        toast.success(`Added ${quantity} item(s) to cart`);
       } else {
         toast.error(result.error || "Failed to add to cart");
       }
@@ -114,10 +128,6 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
   };
 
   const handleBuyNow = async () => {
-    if (!isAuthenticated) {
-      openAuthModal("login");
-      return;
-    }
 
     try {
       setIsBuyNowLoading(true);
@@ -135,6 +145,9 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
       setIsBuyNowLoading(false);
     }
   };
+
+  const displayDiscount = isFirstOrder ? 20 : product.discount;
+  const displayPrice = isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price;
 
   return (
     <div className="flex flex-col pt-4 sm:pt-8">
@@ -161,7 +174,7 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
       {/* Price */}
       <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 mb-6">
         <span className={`${headingFont.className} text-4xl sm:text-5xl text-[#15161b] leading-none whitespace-nowrap`}>
-          Rs. {product.price.toFixed(2)}
+          Rs. {displayPrice.toFixed(2)}
         </span>
         
         <div className="flex items-center gap-3 sm:mb-1">
@@ -170,9 +183,9 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
               Rs. {product.oldPrice.toFixed(2)}
             </span>
           )}
-          {product.discount > 0 && (
+          {displayDiscount > 0 && (
             <span className={`${bodyFont.className} bg-[#c25b5e] text-white text-[10px] sm:text-xs font-bold px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-widest shadow-sm`}>
-              Save {product.discount}%
+              Save {displayDiscount}%
             </span>
           )}
         </div>
