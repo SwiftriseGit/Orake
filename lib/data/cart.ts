@@ -27,13 +27,14 @@ export async function getCart() {
     if (!cart) return { items: [] };
 
     // Map to the shape expected by the frontend
+    const isAuthenticated = !!session?.user;
     const mappedItems = cart.items.map((item: any) => {
        const product = item.productId;
        return {
          id: product._id.toString(),
          name: product.name,
          flavor: product.slug, // using slug as flavor for now based on mockup
-         price: product.price,
+         price: isAuthenticated ? product.price : product.oldPrice,
          oldPrice: product.oldPrice,
          qty: item.quantity,
          image: product.image,
