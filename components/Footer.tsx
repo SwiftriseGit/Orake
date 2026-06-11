@@ -93,7 +93,7 @@ export default function Footer() {
       {/* Divider row: email left, socials right */}
       <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-16 lg:px-28 flex flex-col sm:flex-row justify-between items-center gap-6 sm:gap-4 z-20 py-4">
         <div>
-          <a href="mailto:contact@drinkorake.com" className="group flex items-center gap-4 w-fit">
+          <a href="mailto:contact@drinkorake.com" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 w-fit">
             <span className={`${titleFont.className} text-xl lg:text-2xl tracking-widest uppercase pb-1 border-b-2 border-white/40 group-hover:border-white transition-colors`}>
               contact@drinkorake.com
             </span>
