@@ -20,11 +20,18 @@ export default function ContactInfoSidebar() {
             </div>
             <h4 className={`${textFont.className} font-bold text-base uppercase tracking-wider`}>HQ</h4>
           </div>
-          <p className={`${textFont.className} text-white/60 text-sm pl-[3.25rem] leading-relaxed`}>
-            E House No.-011, S.R.I.T Plot<br />
-            Railway Station Road, Industrial Area<br />
-            Bargarh, Odisha 768028
-          </p>
+          <a 
+            href="https://maps.app.goo.gl/Uz6Rz5VpM15kJdJz5" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="group block"
+          >
+            <p className={`${textFont.className} text-white/60 text-sm pl-[3.25rem] leading-relaxed group-hover:text-white transition-colors`}>
+              T plot, S.R.I, H.No.-011<br />
+              Railway Station Rd<br />
+              Bargarh, Odisha 768028, India
+            </p>
+          </a>
         </div>
 
         <div className="border-t border-white/10 my-6" />
