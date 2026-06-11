@@ -15,9 +15,10 @@ interface WishlistCardProps {
   item: ProductType,
   onRemove: (id: string) => void;
   isFirstOrder?: boolean;
+  isLoggedIn?: boolean;
 }
 
-export default function WishlistCard({ item, onRemove, isFirstOrder = false }: WishlistCardProps) {
+export default function WishlistCard({ item, onRemove, isFirstOrder = false, isLoggedIn = false }: WishlistCardProps) {
   const [isAdding, setIsAdding] = useState(false);
 
   const { incrementCart } = useCartWishlistStore();
@@ -34,7 +35,7 @@ export default function WishlistCard({ item, onRemove, isFirstOrder = false }: W
     }
   };
 
-  const displayPrice = isFirstOrder && item.oldPrice ? Math.round(item.oldPrice * 0.8) : item.price;
+  const displayPrice = !isLoggedIn ? item.oldPrice : (isFirstOrder && item.oldPrice ? Math.round(item.oldPrice * 0.8) : item.price);
 
   return (
     <div className="group bg-white border border-gray-100 rounded-[1.5rem] overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all relative">
@@ -67,7 +68,7 @@ export default function WishlistCard({ item, onRemove, isFirstOrder = false }: W
 
           <div className="flex items-center gap-2">
             <span className={`${textFont.className} text-[#15161b] text-xl font-black`}>Rs. {displayPrice.toFixed(2)}</span>
-            {item.oldPrice > 0 && (
+            {item.oldPrice > displayPrice && (
               <span className={`${textFont.className} text-gray-400 text-sm line-through`}>Rs. {item.oldPrice.toFixed(2)}</span>
             )}
           </div>

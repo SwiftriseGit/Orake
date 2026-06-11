@@ -6,6 +6,7 @@ import OrderSummary from "./OrderSummary";
 import { updateCartItemQty, removeFromCart } from "@/actions/cart";
 import { toast } from "sonner";
 import { useCartWishlistStore } from "@/store/useCartWishlistStore";
+import { useSession } from "@/lib/auth-client";
 
 interface CartItemType {
   id: number;
@@ -41,7 +42,9 @@ export default function CartList({ initialItems: items, pastOrdersCount = 0 }: {
     }
   };
 
-  const isFirstOrder = pastOrdersCount === 0;
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
+  const isFirstOrder = isAuthenticated && pastOrdersCount === 0;
 
   const displayItems = items.map(i => {
     if (isFirstOrder && i.oldPrice) {

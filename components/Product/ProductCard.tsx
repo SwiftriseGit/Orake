@@ -28,14 +28,12 @@ export default function ProductCard({ product, isWishlist, isFirstOrder = false 
     const cardBgColor = "bg-[#f4f4f5]";
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
-
-    // Calculate dynamic pricing based on first order status
-    // If it's the first order, we give 20% discount instead of the standard 15% (or db discount).
-    const displayDiscount = isFirstOrder ? 20 : product.discount;
-    const displayPrice = isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price;
-
     const { openAuthModal } = useAuthStore();
     const { data: session } = useSession();
+
+    const isAuthenticated = !!session?.user;
+    const displayDiscount = !isAuthenticated ? 0 : (isFirstOrder ? 20 : product.discount);
+    const displayPrice = !isAuthenticated ? product.oldPrice : (isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price);
 
     const { incrementCart, incrementWishlist, decrementWishlist } = useCartWishlistStore();
     const guestWishlist = useGuestWishlistStore();
@@ -186,7 +184,7 @@ export default function ProductCard({ product, isWishlist, isFirstOrder = false 
                         {/* ── Bottom Row: Price & Cart ── */}
                         <div className="relative z-20 flex items-center justify-between pt-4 border-t-2 border-black/5 mt-2">
                             <div className={`${bodyFont.className} flex flex-col items-start`}>
-                                {product.oldPrice > 0 && (
+                                {product.oldPrice > displayPrice && (
                                     <span className="text-[12px] sm:text-[13px] text-gray-400 line-through decoration-[#c25b5e] decoration-2 mb-1">
                                         Rs. {product.oldPrice.toFixed(2)}
                                     </span>

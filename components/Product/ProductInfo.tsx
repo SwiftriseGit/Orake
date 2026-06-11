@@ -146,8 +146,8 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
     }
   };
 
-  const displayDiscount = isFirstOrder ? 20 : product.discount;
-  const displayPrice = isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price;
+  const displayDiscount = !isAuthenticated ? 0 : (isFirstOrder ? 20 : product.discount);
+  const displayPrice = !isAuthenticated ? product.oldPrice : (isFirstOrder && product.oldPrice ? Math.round(product.oldPrice * 0.80) : product.price);
 
   return (
     <div className="flex flex-col pt-4 sm:pt-8">
@@ -178,7 +178,7 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
         </span>
         
         <div className="flex items-center gap-3 sm:mb-1">
-          {product.oldPrice > 0 && (
+          {product.oldPrice > displayPrice && (
             <span className={`${bodyFont.className} text-lg sm:text-xl text-gray-400 line-through decoration-[#c25b5e] decoration-2`}>
               Rs. {product.oldPrice.toFixed(2)}
             </span>

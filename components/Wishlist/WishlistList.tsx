@@ -104,7 +104,7 @@ export default function WishlistList({ initialItems, pastOrdersCount = 0, isLogg
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {items.map((item) => (
-              <WishlistCard key={item._id} item={item} onRemove={() => removeItem(item._id, item.slug)} isFirstOrder={isFirstOrder} />
+              <WishlistCard key={item._id} item={item} onRemove={() => removeItem(item._id, item.slug)} isFirstOrder={isFirstOrder} isLoggedIn={isLoggedIn} />
             ))}
           </div>
         )}
