@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Star, StarHalf, ArrowRight } from "lucide-react";
 import { headingFont, bodyFont } from "@/lib/fonts";
 import { StarRating } from "../Product/StarRating";
+import { useSession } from "@/lib/auth-client";
 
 function NewsletterForm() {
   const [email, setEmail] = useState("");
@@ -35,9 +36,10 @@ function NewsletterForm() {
 }
 
 export default function CollectionsSection({ pastOrdersCount = 1 }: { pastOrdersCount?: number }) {
- 
-  const isFirstOrder = pastOrdersCount === 0;
-  const displayPrice = isFirstOrder ? "80.00" : "85.00";
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
+  const isFirstOrder = isAuthenticated && pastOrdersCount === 0;
+  const displayPrice = !isAuthenticated ? "100.00" : (isFirstOrder ? "80.00" : "85.00");
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -171,7 +173,9 @@ export default function CollectionsSection({ pastOrdersCount = 1 }: { pastOrders
               <div className={`${bodyFont.className} flex flex-row items-center justify-between gap-2`}>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. {displayPrice}</span>
-                  <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
+                  {displayPrice !== "100.00" && (
+                    <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
+                  )}
                 </div>
 
                 <Link href="/products" className="group/btn flex items-center gap-1.5 text-[#15161b] hover:text-[#c25b5e] text-[11px] sm:text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all duration-300 whitespace-nowrap">
@@ -231,7 +235,9 @@ export default function CollectionsSection({ pastOrdersCount = 1 }: { pastOrders
               <div className={`${bodyFont.className} flex flex-row items-center justify-between gap-2`}>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl md:text-3xl font-black text-[#15161b] tracking-tight">Rs. {displayPrice}</span>
-                  <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
+                  {displayPrice !== "100.00" && (
+                    <span className="text-xs md:text-sm text-gray-400 line-through decoration-1">Rs. 100.00</span>
+                  )}
                 </div>
 
                 <Link href="/products" className="group/btn flex items-center gap-1.5 text-[#15161b] hover:text-[#dbba53] text-[11px] sm:text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all duration-300 whitespace-nowrap">
