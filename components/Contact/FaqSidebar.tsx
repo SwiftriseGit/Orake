@@ -19,9 +19,9 @@ export default function FaqSidebar() {
         <p className={`${textFont.className} relative z-10 text-gray-400 text-lg mb-10 leading-relaxed font-light`}>
           Our support team actually replies.<br />Drop us a line and we'll fix it.
         </p>
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className={`${textFont.className} relative z-10 bg-[#de3e4f] text-white px-10 py-4 rounded-full text-xl font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-lg shadow-[#de3e4f]/30 active:scale-95`}>
+        <a href="mailto:support@swiftrise.com" target="_blank" rel="noopener noreferrer" className={`${textFont.className} inline-block relative z-10 bg-[#de3e4f] text-white px-10 py-4 rounded-full text-xl font-bold uppercase tracking-wider hover:bg-black transition-colors shadow-lg shadow-[#de3e4f]/30 active:scale-95`}>
           Contact Support
-        </button>
+        </a>
       </div>
 
 

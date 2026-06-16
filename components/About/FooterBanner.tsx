@@ -1,9 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
 import { titleFont, textFont } from "@/lib/fonts";
-
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function FooterBanner() {
+	const { openAuthModal } = useAuthStore();
 	return (
 		<section className="relative h-[500px] sm:h-[600px] md:h-[800px] flex items-center justify-center text-center text-white bg-[#15161b] overflow-hidden">
 
@@ -61,6 +62,7 @@ export default function FooterBanner() {
 					transition={{ duration: 0.6, type: "spring", bounce: 0.4, delay: 0.45 }}
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
+					onClick={() => openAuthModal("signup")}
 					className={`${textFont.className} bg-[#de3e4f] text-white px-8 py-3.5 sm:px-10 sm:py-4 md:px-12 md:py-5 rounded-full font-bold text-xs sm:text-sm md:text-lg uppercase tracking-widest hover:bg-black transition-colors shadow-[0_10px_30px_rgba(222,62,79,0.5)] border-2 border-transparent hover:border-[#de3e4f]`}
 				>
 					SIGN UP FOR ALERTS

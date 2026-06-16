@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { titleFont, textFont } from "@/lib/fonts";
+import Link from "next/link";
 
 
 export default function Advertising() {
@@ -44,15 +45,17 @@ export default function Advertising() {
                     >
                         The ultimate fusion of taste and prebiotic goodness. Refresh differently.
                     </motion.p>
-                    <motion.button
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: false }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className={`${textFont.className} px-8 py-4 bg-[#c25b5e] text-white rounded-full font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-[#15161b] transition-colors shadow-2xl hover:scale-105 duration-300`}
-                    >
-                        Discover More
-                    </motion.button>
+                    <Link href="/products">
+                        <motion.button
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: false }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
+                            className={`${textFont.className} px-8 py-4 bg-[#c25b5e] text-white rounded-full font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-[#15161b] transition-colors shadow-2xl hover:scale-105 duration-300`}
+                        >
+                            Discover More
+                        </motion.button>
+                    </Link>
                 </div>
             </div>
         </section>
