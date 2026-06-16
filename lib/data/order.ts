@@ -10,9 +10,9 @@ async function getSession() {
 
 export async function getOrders() {
   // No 'use cache' — per-user data, always fresh
-  // Dynamic via getSession() → headers()
+  // Dynamic via getSession() -> headers()
+  const session = await getSession();
   try {
-    const session = await getSession();
     if (!session?.user) return { orders: [], total: 0 };
 
     await connectDB();

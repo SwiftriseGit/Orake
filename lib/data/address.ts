@@ -9,8 +9,8 @@ async function getSession() {
 }
 
 export async function getAddresses() {
+  const session = await getSession();
   try {
-    const session = await getSession();
     if (!session?.user) return [];
 
     await connectDB();
