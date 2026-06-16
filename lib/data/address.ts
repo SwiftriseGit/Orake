@@ -10,8 +10,9 @@ async function getSession() {
 
 export async function getAddresses() {
   const session = await getSession();
+  if (!session?.user) return [];
+
   try {
-    if (!session?.user) return [];
 
     await connectDB();
     const addresses = await Address.find({ userId: session.user.id }).lean();

@@ -10,10 +10,11 @@ async function getSession() {
 
 export async function getOrders() {
   // No 'use cache' — per-user data, always fresh
-  // Dynamic via getSession() -> headers()
+  // headers() must be outside try/catch so Next.js can detect dynamic usage during prerender
   const session = await getSession();
+  if (!session?.user) return { orders: [], total: 0 };
+
   try {
-    if (!session?.user) return { orders: [], total: 0 };
 
     await connectDB();
 
