@@ -102,7 +102,6 @@ small{
 
     <div class="divider"></div>
 
-    <small>© 2026 ORAKE. All rights reserved.</small>
 
 </div>
 
