@@ -1,5 +1,9 @@
 import { create } from "zustand";
 
+
+
+
+
 interface AuthState {
   isAuthModalOpen: boolean;
   authModalView: "login" | "signup" | "forgot-password" | "verify-otp";
