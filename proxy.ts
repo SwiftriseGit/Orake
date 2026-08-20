@@ -5,6 +5,7 @@ const protectedRoutes = ["/account", "/orders", "/checkout"];
 const MAINTENANCE_MODE = true;
 
 export default function middleware(req: NextRequest) {
+   
 // if (MAINTENANCE_MODE) {
 //     return new NextResponse(
 //       `
