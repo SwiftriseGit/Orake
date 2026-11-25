@@ -1,10 +1,138 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Leaf, Sparkles, Flame, ShieldCheck, Zap, CheckCircle2, Droplets } from "lucide-react";
 import { headingFont, bodyFont } from "@/lib/fonts";
 import ReviewModal from "./ReviewModal";
 import { PopulatedReview } from "@/lib/data/review";
 import { StarRating } from "./StarRating";
+
+function NutritionFactsSection({ compact = false }: { compact?: boolean }) {
+  const highlights = [
+    { value: "6g", label: "Prebiotic Fiber", sub: "Gut-friendly fuel", icon: Sparkles, accent: true },
+    { value: "ZERO", label: "Calories", sub: "Guilt-free fizz", icon: Flame, accent: false },
+    { value: "0g", label: "No Added Sugar", sub: "Naturally refreshing", icon: Droplets, accent: false },
+  ];
+
+  const vitamins = [
+    { code: "B2", name: "Vitamin B2" },
+    { code: "B6", name: "Vitamin B6" },
+    { code: "B12", name: "Vitamin B12" },
+  ];
+
+  const badges = [
+    { label: "100% Plant Based", icon: Leaf },
+    { label: "Natural Flavors", icon: CheckCircle2 },
+    { label: "Vegan", icon: ShieldCheck },
+  ];
+
+  return (
+    <div className={`${compact ? "pt-6 border-t border-gray-100" : ""}`}>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+        <div>
+          <span className={`${bodyFont.className} text-[10px] font-bold uppercase tracking-[0.22em] text-[#c25b5e] block mb-1`}>
+            Clean Ingredients
+          </span>
+          <h3 className={`${headingFont.className} text-2xl sm:text-3xl text-[#15161b] uppercase tracking-wide`}>
+            Nutrition Facts
+          </h3>
+        </div>
+        <span className={`${bodyFont.className} text-[11px] font-semibold uppercase tracking-widest text-gray-400`}>
+          Crafted for Everyday Wellness
+        </span>
+      </div>
+
+      {/* Main Nutrition Highlights Bento */}
+      <div className="bg-white rounded-[28px] border border-gray-100 p-5 sm:p-7 shadow-[0_12px_35px_rgba(0,0,0,0.03)] space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {highlights.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.label}
+                className={`rounded-2xl p-5 transition-all ${
+                  item.accent
+                    ? "bg-[#15161b] text-white shadow-lg shadow-[#15161b]/10"
+                    : "bg-[#fafafa] text-[#15161b] border border-gray-100"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className={`${headingFont.className} text-3xl sm:text-4xl tracking-tight ${
+                      item.accent ? "text-[#c25b5e]" : "text-[#15161b]"
+                    }`}
+                  >
+                    {item.value}
+                  </span>
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                      item.accent ? "bg-white/10 text-[#c25b5e]" : "bg-white text-[#c25b5e] shadow-sm border border-gray-100"
+                    }`}
+                  >
+                    <Icon size={17} />
+                  </div>
+                </div>
+                <p className={`${bodyFont.className} text-sm font-bold tracking-wide`}>
+                  {item.label}
+                </p>
+                <p className={`${bodyFont.className} text-[11px] mt-0.5 ${item.accent ? "text-gray-400" : "text-gray-400"}`}>
+                  {item.sub}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Vitamins Row */}
+        <div className="bg-[#fdf8f8] border border-[#c25b5e]/15 rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3.5">
+            <div className="w-6 h-6 rounded-lg bg-[#c25b5e]/10 text-[#c25b5e] flex items-center justify-center">
+              <Zap size={13} />
+            </div>
+            <span className={`${bodyFont.className} text-xs font-bold uppercase tracking-[0.18em] text-[#15161b]`}>
+              With Vitamins
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {vitamins.map((vit) => (
+              <div
+                key={vit.code}
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-[#c25b5e]/10 shadow-xs"
+              >
+                <span className={`${headingFont.className} w-9 h-9 rounded-lg bg-[#15161b] text-white text-sm flex items-center justify-center shrink-0 tracking-wider`}>
+                  {vit.code}
+                </span>
+                <span className={`${bodyFont.className} text-sm font-bold text-[#15161b]`}>
+                  {vit.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Purity & Lifestyle Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          {badges.map((badge) => {
+            const Icon = badge.icon;
+            return (
+              <div
+                key={badge.label}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#fafafa] border border-gray-100"
+              >
+                <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-[#c25b5e] shrink-0 shadow-xs">
+                  <Icon size={15} />
+                </div>
+                <span className={`${bodyFont.className} text-xs sm:text-sm font-bold text-[#15161b]`}>
+                  {badge.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface ProductTabsProps {
   product: {
@@ -75,57 +203,7 @@ export default function ProductTabs({ product, reviews }: ProductTabsProps) {
               <p>How does it taste then? Delightfully tasty! Sweetened with real fruit extracts only, it&apos;s a supercool and healthier alternative to regular sodas. You can enjoy it anytime, whether you&apos;re watching a movie, partying, or simply hanging out with friends.</p>
               <p>So, if you want to savor the classic taste sans the sugar, make a smart choice today. Order Orake {product.name} to enjoy all the fizz and flavor, and say goodbye to all the guilt.</p>
 
-              <div className="pt-6 border-t border-gray-100">
-                <h3 className={`${headingFont.className} text-xl sm:text-2xl text-[#15161b] uppercase tracking-wide mb-4`}>
-                  Nutrition Facts
-                </h3>
-                <ul className="space-y-3 max-w-md">
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">6g Prebiotic Fiber</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Natural Flavors</span>
-                  </li>
-                  <li className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                      <span className="font-medium text-[#15161b]">With Vitamins:</span>
-                    </div>
-                    <ul className="pl-6 space-y-2 text-sm text-gray-600">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B2 – 2.5 mg</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B6 – 1.1 mg</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B12 – 0.50 mg</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">100% Plant Based</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Zero Calories</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Vegan</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">No Added Sugar</span>
-                  </li>
-                </ul>
-              </div>
+              <NutritionFactsSection compact />
             </motion.div>
           )}
 
@@ -137,57 +215,7 @@ export default function ProductTabs({ product, reviews }: ProductTabsProps) {
               exit={{ opacity: 0, y: -10 }}
               className={`${bodyFont.className} text-gray-500 leading-relaxed max-w-4xl text-[15px] sm:text-base space-y-6`}
             >
-              <div>
-                <h3 className={`${headingFont.className} text-2xl sm:text-3xl text-[#15161b] uppercase tracking-wide mb-4`}>
-                  Nutrition Facts
-                </h3>
-                <ul className="space-y-3 max-w-md">
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">6g Prebiotic Fiber</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Natural Flavors</span>
-                  </li>
-                  <li className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                      <span className="font-medium text-[#15161b]">With Vitamins:</span>
-                    </div>
-                    <ul className="pl-6 space-y-2 text-sm text-gray-600">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B2 – 2.5 mg</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B6 – 1.1 mg</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                        <span>Vitamin B12 – 0.50 mg</span>
-                      </li>
-                    </ul>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">100% Plant Based</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Zero Calories</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">Vegan</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
-                    <span className="font-medium text-[#15161b]">No Added Sugar</span>
-                  </li>
-                </ul>
-              </div>
+              <NutritionFactsSection />
             </motion.div>
           )}
 
