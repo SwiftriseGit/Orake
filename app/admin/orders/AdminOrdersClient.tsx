@@ -151,7 +151,7 @@ export default function AdminOrdersClient({
             <table className="w-full min-w-[640px]">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-gray-50/90 backdrop-blur-sm border-b border-gray-100">
-                  {["Customer", "Items", "Total", "Payment", "Status", "Date", ""].map(h => (
+                  {["Order #", "Customer", "Items", "Total", "Payment", "Status", "Date", ""].map(h => (
                     <th key={h} className={`${tx.className} text-left px-5 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 whitespace-nowrap`}>{h}</th>
                   ))}
                 </tr>
@@ -161,6 +161,11 @@ export default function AdminOrdersClient({
                   const StatusIcon = STATUS_ICONS[order.status] || Package;
                   return (
                     <tr key={order._id} className="hover:bg-gray-50/60 transition-colors">
+                      <td className="px-5 py-3">
+                        <span className={`${tx.className} text-xs font-mono font-bold text-[#c25b5e]`}>
+                          #{order.orderNumber || order._id.slice(-6).toUpperCase()}
+                        </span>
+                      </td>
                       <td className="px-5 py-3">
                         <p className={`${tx.className} text-sm font-semibold text-[#15161b]`}>{order.customerName || "Unknown"}</p>
                         <p className={`${tx.className} text-[11px] text-gray-400`}>{order.customerEmail}</p>
@@ -197,7 +202,7 @@ export default function AdminOrdersClient({
             <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between z-10">
               <div>
                 <h3 className={`${tf.className} text-xl uppercase tracking-wide text-[#15161b]`}>Order Details</h3>
-                <p className={`${tx.className} text-[10px] text-gray-400 font-mono mt-0.5`}>{viewOrder._id}</p>
+                <p className={`${tx.className} text-xs text-[#c25b5e] font-mono font-bold mt-0.5`}>#{viewOrder.orderNumber || viewOrder._id}</p>
               </div>
               <button onClick={() => setViewOrder(null)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#15161b]"><X size={16} /></button>
             </div>

@@ -74,7 +74,7 @@ export default function OrderSuccessModal({ isOpen, onClose, orderId, paymentMet
             
             {orderId && (
               <p className={`${textFont.className} text-gray-400 text-xs sm:text-sm mb-8`}>
-                Order ID: <span className="font-semibold text-gray-600">{orderId}</span>
+                Order ID: <span className="font-semibold text-[#15161b] font-mono">#{orderId}</span>
               </p>
             )}
 

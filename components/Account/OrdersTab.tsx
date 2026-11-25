@@ -18,6 +18,7 @@ interface OrderItem {
 
 interface Order {
   _id: string;
+  orderNumber?: string;
   createdAt: string;
   orderItems: OrderItem[];
   shippingAddress: {
@@ -152,7 +153,8 @@ export default function OrdersTab({ initialOrders = [] }: OrdersTabProps) {
                               {order.orderItems.length === 1 ? order.orderItems[0].name : `${order.orderItems[0].name} + ${order.orderItems.length - 1} more`}
                             </p>
                             <p className={`${textFont.className} text-[11px] text-gray-400 mt-0.5`}>
-                              {formatDate(order.createdAt)} • {itemCount} {itemCount === 1 ? "item" : "items"}
+                              <span className="font-mono font-semibold text-[#c25b5e] mr-1.5">#{order.orderNumber || order._id.slice(-6).toUpperCase()}</span>
+                              • {formatDate(order.createdAt)} • {itemCount} {itemCount === 1 ? "item" : "items"}
                             </p>
                           </div>
                           <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap sm:flex-nowrap">

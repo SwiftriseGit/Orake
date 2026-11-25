@@ -87,8 +87,11 @@ export async function placeOrder(shippingAddress: ShippingAddress & { email?: st
     }));
 
     // Create the order in MongoDB
+    const customerEmail = session?.user?.email || shippingAddress.email;
+
     const order = new Order({
         userId: session?.user?.id,
+        customerEmail,
         guestEmail: !session?.user ? shippingAddress.email : undefined,
         orderItems,
         shippingAddress,
@@ -133,6 +136,7 @@ export async function placeOrder(shippingAddress: ShippingAddress & { email?: st
     return {
         success: true,
         orderId: order._id.toString(),
+        orderNumber: order.orderNumber || order._id.toString(),
         totalPrice,
         razorpayOrderId: order.paymentResult?.id
     };

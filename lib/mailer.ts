@@ -209,3 +209,145 @@ export async function sendWaitlistEmail(data: {
     });
   });
 }
+
+export async function sendOrderConfirmationEmail(data: {
+  to: string;
+  orderNumber: string;
+  customerName: string;
+  totalPrice: number;
+  paymentMethod: string;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  orderItems: {
+    name: string;
+    quantity: number;
+    price: number;
+    image?: string;
+  }[];
+}) {
+  const itemsHtml = data.orderItems
+    .map(
+      (item) => `
+      <tr style="border-bottom: 1px solid #f3f4f6;">
+        <td style="padding: 12px 8px; vertical-align: middle;">
+          ${item.image ? `<img src="${item.image}" alt="${item.name}" width="48" height="48" style="border-radius: 8px; object-fit: contain; background: #f9fafb; vertical-align: middle; margin-right: 12px; display: inline-block;" />` : ''}
+          <span style="font-weight: 600; color: #15161b; font-size: 14px;">${item.name}</span>
+        </td>
+        <td style="padding: 12px 8px; text-align: center; color: #6b7280; font-size: 14px;">×${item.quantity}</td>
+        <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: #15161b; font-size: 14px;">₹${item.price * item.quantity}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const mailOptions = {
+    from: `"Orake Orders" <${process.env.EMAIL_USER}>`,
+    to: data.to,
+    replyTo: process.env.EMAIL_USER,
+    subject: `Order Confirmed: #${data.orderNumber} — Thank You for Choosing Orake! 🔥`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+        <!-- Header -->
+        <div style="background: #15161b; padding: 36px 30px; text-align: center;">
+          <h1 style="color: #ffffff; font-size: 30px; margin: 0 0 6px; letter-spacing: 3px; font-weight: 800;">
+            ORAKE
+          </h1>
+          <p style="color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">
+            Prebiotic Soda For Gut Health
+          </p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 36px 30px;">
+          <div style="display: inline-block; background: #ecfdf5; color: #059669; padding: 6px 14px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px;">
+            ✓ Order Confirmed
+          </div>
+
+          <h2 style="color: #15161b; font-size: 22px; margin: 0 0 8px; font-weight: 700;">
+            Thank you, ${data.customerName}!
+          </h2>
+          <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">
+            We've received your order and we're getting it ready to be shipped. Here is your order confirmation.
+          </p>
+
+          <!-- Order Reference Box -->
+          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; margin-bottom: 28px;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="vertical-align: top;">
+                  <p style="color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px;">Order Number</p>
+                  <p style="color: #c25b5e; font-size: 18px; font-weight: 800; font-family: monospace; margin: 0;">#${data.orderNumber}</p>
+                </td>
+                <td style="vertical-align: top; text-align: right;">
+                  <p style="color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px;">Payment Method</p>
+                  <p style="color: #15161b; font-size: 13px; font-weight: 700; margin: 0;">${data.paymentMethod === "COD" ? "Cash on Delivery" : "Online (Razorpay)"}</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Items Table -->
+          <h3 style="color: #15161b; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px; font-weight: 700;">
+            Items in Your Order
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+            <thead>
+              <tr style="border-bottom: 2px solid #e5e7eb; text-align: left;">
+                <th style="padding: 8px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px;">Item</th>
+                <th style="padding: 8px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Qty</th>
+                <th style="padding: 8px; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" style="padding: 16px 8px 4px; font-size: 15px; font-weight: 800; color: #15161b; text-transform: uppercase;">Total</td>
+                <td style="padding: 16px 8px 4px; font-size: 18px; font-weight: 800; color: #c25b5e; text-align: right;">₹${data.totalPrice}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Shipping Address -->
+          <div style="background: #f9fafb; border-radius: 14px; padding: 18px 20px; border: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px; font-weight: 700;">Shipping To</p>
+            <p style="color: #15161b; font-size: 14px; font-weight: 600; margin: 0 0 4px;">${data.shippingAddress.fullName}</p>
+            <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin: 0 0 4px;">
+              ${data.shippingAddress.street}, ${data.shippingAddress.city}, ${data.shippingAddress.state} - ${data.shippingAddress.postalCode}
+            </p>
+            <p style="color: #6b7280; font-size: 13px; margin: 0;">Phone: ${data.shippingAddress.phone}</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f9fafb; padding: 24px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 12px; margin: 0 0 6px;">
+            Questions about your order? Email us at <a href="mailto:raj@drinkorake.com" style="color: #c25b5e; text-decoration: none; font-weight: 600;">raj@drinkorake.com</a>
+          </p>
+          <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+            © 2026 Orake. All rights reserved.
+          </p>
+        </div>
+      </div>
+    `,
+  };
+
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending order confirmation email:", err);
+        reject(err);
+      } else {
+        resolve(info);
+      }
+    });
+  });
+}

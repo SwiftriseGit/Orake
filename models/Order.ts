@@ -1,13 +1,18 @@
 import mongoose, { Schema } from "mongoose";
 import { OrderItemSchema, IOrderItem } from "./OrderItem";
+import { Counter } from "./Counter";
+import { sendOrderConfirmationEmail } from "@/lib/mailer";
 
 export interface IOrder {
+    orderNumber?: string;
+    customerEmail?: string;
     userId?: mongoose.Schema.Types.ObjectId;
     guestEmail?: string;
     orderItems: IOrderItem[];
     shippingAddress: {
         fullName: string;
         phone: string;
+        email?: string;
         street: string;
         city: string;
         state: string;
@@ -32,6 +37,16 @@ export interface IOrder {
 }
 
 const OrderSchema = new Schema<IOrder>({
+    orderNumber: {
+        type: String,
+        unique: true,
+        sparse: true,
+        index: true
+    },
+    customerEmail: {
+        type: String,
+        required: false
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: false,
@@ -72,7 +87,30 @@ const OrderSchema = new Schema<IOrder>({
     }
 }, { timestamps: true });
 
-OrderSchema.pre("save", function () {
+OrderSchema.pre("save", async function () {
+    // 1. Generate sequential orderNumber if this is a new order
+    if (!this.orderNumber) {
+        const now = new Date();
+        const istDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        const yy = String(istDate.getFullYear()).slice(-2);
+        const mm = String(istDate.getMonth() + 1).padStart(2, "0");
+        const dd = String(istDate.getDate()).padStart(2, "0");
+        const prefix = `${yy}${mm}${dd}`;
+
+        const counter = await Counter.findByIdAndUpdate(
+            `order_${prefix}`,
+            { $inc: { seq: 1 } },
+            { returnDocument: "after", upsert: true }
+        );
+        this.orderNumber = `${prefix}-${String(counter.seq).padStart(4, "0")}`;
+    }
+
+    // 2. Track whether this document is new for post('save') email hook
+    if (this.isNew) {
+        (this as any)._wasNew = true;
+    }
+
+    // 3. Status sync for Delivered
     if (this.status === "Delivered") {
         this.isDelivered = true;
         if (!this.deliveredAt) {
@@ -86,6 +124,28 @@ OrderSchema.pre("save", function () {
         }
     } else {
         this.isDelivered = false;
+    }
+});
+
+OrderSchema.post("save", async function (doc) {
+    if ((this as any)._wasNew) {
+        (this as any)._wasNew = false;
+        const targetEmail = doc.customerEmail || doc.guestEmail || doc.shippingAddress?.email;
+        if (targetEmail) {
+            try {
+                await sendOrderConfirmationEmail({
+                    to: targetEmail,
+                    orderNumber: doc.orderNumber || doc._id.toString(),
+                    customerName: doc.shippingAddress?.fullName || "Valued Customer",
+                    totalPrice: doc.totalPrice,
+                    paymentMethod: doc.paymentMethod,
+                    shippingAddress: doc.shippingAddress,
+                    orderItems: doc.orderItems,
+                });
+            } catch (err) {
+                console.error("Order confirmation email failed via Mongoose middleware:", err);
+            }
+        }
     }
 });
 

@@ -17,6 +17,7 @@ export interface OrderFilters {
 
 export interface AdminOrder {
   _id: string;
+  orderNumber?: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;

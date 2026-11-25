@@ -122,7 +122,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
       // 2. If COD, we are done! (cart already cleared on server by placeOrder)
       if (paymentMethod === "COD") {
         setCartCount(0);
-        setSuccessOrderId(res.orderId);
+        setSuccessOrderId(res.orderNumber || res.orderId);
         setIsSuccessModalOpen(true);
         setProcessing(false);
         return;
@@ -156,7 +156,7 @@ export default function CheckoutForm({ initialCartItems, user, initialAddresses 
             if (verifyRes.success) {
               await clearCart();
               setCartCount(0);
-              setSuccessOrderId(res.orderId); // Show our DB order ID
+              setSuccessOrderId(res.orderNumber || res.orderId); // Show our formatted orderNumber
               setIsSuccessModalOpen(true);
             } else {
               toast.error(verifyRes.error || "Payment verification failed");
