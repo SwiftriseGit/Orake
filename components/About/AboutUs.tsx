@@ -73,7 +73,7 @@ export default function AboutUs() {
 								className="absolute -bottom-2 -right-2 md:right-0 w-16 h-16 md:w-[76px] md:h-[76px] xl:w-[88px] xl:h-[88px] bg-[#15161b] rounded-full flex flex-col items-center justify-center text-white border-[3px] border-[#e8e8e9] shadow-2xl z-20"
 							>
 								<span className={`${titleFont.className} text-xl md:text-2xl leading-none tracking-widest text-[#c25b5e]`}>0G</span>
-								<span className={`${textFont.className} text-[6px] md:text-[7px] font-bold uppercase tracking-[0.15em]`}>Sucralose</span>
+								<span className={`${textFont.className} text-[6px] md:text-[7px] font-bold uppercase tracking-[0.15em]`}>Sugar</span>
 							</motion.div>
 						</motion.div>
 

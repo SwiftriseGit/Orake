@@ -5,10 +5,14 @@ import { Order } from "@/models/Order";
 import { updateTag } from "next/cache";
 import type { OrderStatus } from "@/lib/data/admin-orders";
 
-export async function updateOrderStatus(id: string, status: OrderStatus) {
+export async function updateOrderStatus(id: string, status: OrderStatus, trackingLink?: string) {
   await connectDB();
 
   const updateData: any = { status };
+
+  if (trackingLink !== undefined) {
+    updateData.trackingLink = trackingLink.trim();
+  }
 
   if (status === "Delivered") {
     updateData.isDelivered = true;
@@ -20,6 +24,15 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
   }
 
   await Order.findByIdAndUpdate(id, updateData, { new: true });
+  updateTag("admin-orders");
+  updateTag("admin-stats");
+  updateTag("orders");
+  return { success: true };
+}
+
+export async function updateOrderTrackingLink(id: string, trackingLink: string) {
+  await connectDB();
+  await Order.findByIdAndUpdate(id, { trackingLink: trackingLink.trim() }, { new: true });
   updateTag("admin-orders");
   updateTag("admin-stats");
   updateTag("orders");

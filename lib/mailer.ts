@@ -273,9 +273,19 @@ export async function sendOrderConfirmationEmail(data: {
           <h2 style="color: #15161b; font-size: 22px; margin: 0 0 8px; font-weight: 700;">
             Thank you, ${data.customerName}!
           </h2>
-          <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">
-            We've received your order and we're getting it ready to be shipped. Here is your order confirmation.
+          <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+            We've received your order and we're getting it ready to be shipped. Your products will be delivered within <strong>7 days</strong>.
           </p>
+
+          <!-- Estimated Delivery Notice -->
+          <div style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; text-align: left;">
+            <p style="color: #c25b5e; font-size: 13px; font-weight: 700; margin: 0 0 3px; text-transform: uppercase; letter-spacing: 0.5px;">
+              🚚 Estimated Delivery: Within 7 Days
+            </p>
+            <p style="color: #4b5563; font-size: 12px; margin: 0; line-height: 1.5;">
+              Your order is being prepared and will be delivered to your door within 7 days. We will update your tracking link as soon as it is dispatched!
+            </p>
+          </div>
 
           <!-- Order Reference Box -->
           <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; margin-bottom: 28px;">

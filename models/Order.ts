@@ -34,6 +34,7 @@ export interface IOrder {
     isDelivered: boolean;
     deliveredAt?: Date;
     status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+    trackingLink?: string;
 }
 
 const OrderSchema = new Schema<IOrder>({
@@ -84,6 +85,10 @@ const OrderSchema = new Schema<IOrder>({
         type: String,
         enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
         default: "Pending"
+    },
+    trackingLink: {
+        type: String,
+        required: false
     }
 }, { timestamps: true });
 

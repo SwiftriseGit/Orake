@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Eye, Package, Truck, CheckCircle, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { adminTitleFont as tf, adminTextFont as tx } from "@/lib/fonts";
-import { updateOrderStatus, updateOrderPaymentStatus } from "@/actions/admin-orders";
+import { updateOrderStatus, updateOrderPaymentStatus, updateOrderTrackingLink } from "@/actions/admin-orders";
 import type { AdminOrder } from "@/lib/data/admin-orders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useEffect } from "react";
@@ -47,6 +47,8 @@ export default function AdminOrdersClient({
 
   const [optimisticOrders, setOptimisticOrders] = useState<AdminOrder[]>(initialOrders);
   const [viewOrder, setViewOrder] = useState<AdminOrder | null>(null);
+  const [trackingInput, setTrackingInput] = useState("");
+  const [isSavingTracking, setIsSavingTracking] = useState(false);
 
   const [searchValue, setSearchValue] = useState(currentSearch);
   const debouncedSearch = useDebounce(searchValue, 350);
@@ -54,6 +56,25 @@ export default function AdminOrdersClient({
   useEffect(() => {
     setOptimisticOrders(initialOrders);
   }, [initialOrders]);
+
+  const handleOpenOrder = (order: AdminOrder) => {
+    setViewOrder(order);
+    setTrackingInput(order.trackingLink || "");
+  };
+
+  const handleSaveTrackingLink = async () => {
+    if (!viewOrder) return;
+    setIsSavingTracking(true);
+    try {
+      await updateOrderTrackingLink(viewOrder._id, trackingInput);
+      setViewOrder(p => p ? { ...p, trackingLink: trackingInput } : null);
+      setOptimisticOrders(prev => prev.map(o => o._id === viewOrder._id ? { ...o, trackingLink: trackingInput } : o));
+    } catch (e) {
+      console.error("Failed to update tracking link:", e);
+    } finally {
+      setIsSavingTracking(false);
+    }
+  };
 
   useEffect(() => {
     if (debouncedSearch !== currentSearch) {
@@ -184,7 +205,7 @@ export default function AdminOrdersClient({
                         {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="px-5 py-3">
-                        <button onClick={() => setViewOrder(order)} className="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-[#c25b5e] hover:text-white flex items-center justify-center transition-colors"><Eye size={13} /></button>
+                        <button onClick={() => handleOpenOrder(order)} className="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-[#c25b5e] hover:text-white flex items-center justify-center transition-colors"><Eye size={13} /></button>
                       </td>
                     </tr>
                   );
@@ -261,6 +282,50 @@ export default function AdminOrdersClient({
                 >
                   {viewOrder.isPaid ? "Mark Unpaid" : "Mark Paid"}
                 </button>
+              </div>
+
+              {/* Delivery Tracking Link */}
+              <div className="bg-gray-50 rounded-xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className={`${tx.className} text-[10px] text-gray-400 uppercase tracking-widest flex items-center gap-1.5`}>
+                    <Truck size={12} /> Delivery Tracking Link
+                  </p>
+                  {viewOrder.trackingLink && (
+                    <a
+                      href={viewOrder.trackingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${tx.className} text-[10px] text-[#c25b5e] hover:underline flex items-center gap-1 font-semibold`}
+                    >
+                      Open Link ↗
+                    </a>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    placeholder="e.g. https://track.example.com/12345"
+                    value={trackingInput}
+                    onChange={e => setTrackingInput(e.target.value)}
+                    className={`${tx.className} flex-1 bg-white border border-gray-200 px-3 py-2 rounded-xl text-xs placeholder-gray-400 focus:border-[#c25b5e] focus:outline-none`}
+                  />
+                  <button
+                    disabled={isSavingTracking || isPending}
+                    onClick={handleSaveTrackingLink}
+                    className={`${tx.className} px-3.5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-[#15161b] text-white hover:bg-[#c25b5e] transition-colors disabled:opacity-50 shrink-0`}
+                  >
+                    {isSavingTracking ? "Saving…" : "Save Link"}
+                  </button>
+                </div>
+                {viewOrder.trackingLink ? (
+                  <p className={`${tx.className} text-[11px] text-green-700 flex items-center gap-1 truncate`}>
+                    ✓ Active: <span className="font-mono text-gray-600 truncate">{viewOrder.trackingLink}</span>
+                  </p>
+                ) : (
+                  <p className={`${tx.className} text-[11px] text-gray-400`}>
+                    No link set. Customer account will show &ldquo;Track link will update soon&rdquo;.
+                  </p>
+                )}
               </div>
 
               <div>

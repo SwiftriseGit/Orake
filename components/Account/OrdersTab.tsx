@@ -19,6 +19,7 @@ interface OrderItem {
 interface Order {
   _id: string;
   orderNumber?: string;
+  trackingLink?: string;
   createdAt: string;
   orderItems: OrderItem[];
   shippingAddress: {
@@ -271,10 +272,27 @@ export default function OrdersTab({ initialOrders = [] }: OrdersTabProps) {
 
                       {/* Actions */}
                       <div className="flex flex-col sm:flex-row gap-2.5 pt-5 mt-3 border-t border-gray-100">
-                        {(order.status === "Shipped" || order.status === "Processing") && (
-                          <button className={`${textFont.className} flex-1 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white bg-[#15161b] hover:bg-[#c25b5e] py-2.5 px-4 rounded-xl transition-all`}>
-                            <Truck size={13} /> Track Order
-                          </button>
+                        {order.status !== "Cancelled" && (
+                          order.trackingLink ? (
+                            <a
+                              href={order.trackingLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`${textFont.className} flex-1 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white bg-[#15161b] hover:bg-[#c25b5e] py-2.5 px-4 rounded-xl transition-all shadow-sm`}
+                            >
+                              <Truck size={13} /> Track Order ↗
+                            </a>
+                          ) : (
+                            order.status !== "Delivered" && (
+                              <button
+                                disabled
+                                title="Tracking link will be updated soon"
+                                className={`${textFont.className} flex-1 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 py-2.5 px-4 rounded-xl cursor-not-allowed`}
+                              >
+                                <Truck size={13} /> Track link will update soon
+                              </button>
+                            )
+                          )
                         )}
                         {canCancel(order.status) && (
                           <button

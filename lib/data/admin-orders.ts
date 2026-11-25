@@ -29,6 +29,7 @@ export interface AdminOrder {
   deliveredAt?: string;
   paidAt?: string;
   status: OrderStatus;
+  trackingLink?: string;
   shippingAddress: { street?: string; city?: string; state?: string; postalCode?: string };
   createdAt: string;
 }
