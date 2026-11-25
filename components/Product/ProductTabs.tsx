@@ -7,38 +7,31 @@ import { PopulatedReview } from "@/lib/data/review";
 import { StarRating } from "./StarRating";
 
 function NutritionFactsSection({ compact = false }: { compact?: boolean }) {
+  const rows = [
+    { label: "Prebiotic Fiber", value: "6g", highlight: true },
+    { label: "Calories", value: "Zero" },
+    { label: "Added Sugar", value: "No Added Sugar" },
+    { label: "Flavors", value: "Natural Flavors" },
+    { label: "With Vitamins", value: "Vitamin B2, Vitamin B6, Vitamin B12" },
+    { label: "Source", value: "100% Plant Based · Vegan" },
+  ];
+
   return (
-    <div className={`${compact ? "pt-6 border-t border-gray-100" : ""} max-w-xl`}>
-      <h3 className={`${headingFont.className} text-xl sm:text-2xl text-[#15161b] uppercase tracking-wide mb-4`}>
+    <div className={`${compact ? "pt-6 border-t border-gray-100" : ""} w-full max-w-xl`}>
+      <h3 className={`${headingFont.className} text-xl sm:text-2xl text-[#15161b] uppercase tracking-wide mb-3 sm:mb-4`}>
         Nutrition Facts
       </h3>
 
-      <div className={`${bodyFont.className} divide-y divide-gray-200/70 border-t border-b border-gray-200/70 text-sm sm:text-[15px]`}>
-        <div className="py-3 flex items-baseline justify-between gap-4">
-          <span className="font-semibold text-[#15161b]">Prebiotic Fiber</span>
-          <span className="text-[#c25b5e] font-bold">6g</span>
-        </div>
-        <div className="py-3 flex items-baseline justify-between gap-4">
-          <span className="font-semibold text-[#15161b]">Calories</span>
-          <span className="text-gray-500 font-medium">Zero</span>
-        </div>
-        <div className="py-3 flex items-baseline justify-between gap-4">
-          <span className="font-semibold text-[#15161b]">Added Sugar</span>
-          <span className="text-gray-500 font-medium">No Added Sugar</span>
-        </div>
-        <div className="py-3 flex items-baseline justify-between gap-4">
-          <span className="font-semibold text-[#15161b]">Flavors</span>
-          <span className="text-gray-500 font-medium">Natural Flavors</span>
-        </div>
-        <div className="py-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-4">
-          <span className="font-semibold text-[#15161b]">With Vitamins</span>
-          <span className="text-gray-500 font-medium">Vitamin B2, Vitamin B6, Vitamin B12</span>
-        </div>
-        <div className="py-3 flex items-baseline justify-between gap-4">
-          <span className="font-semibold text-[#15161b]">Source</span>
-          <span className="text-gray-500 font-medium">100% Plant Based · Vegan</span>
-        </div>
-      </div>
+      <dl className={`${bodyFont.className} w-full divide-y divide-gray-200/70 border-t border-b border-gray-200/70 text-[13px] sm:text-[15px]`}>
+        {rows.map((row) => (
+          <div key={row.label} className="py-2.5 sm:py-3 flex items-baseline justify-between gap-4">
+            <dt className="font-semibold text-[#15161b] shrink-0">{row.label}</dt>
+            <dd className={`text-right ${row.highlight ? "text-[#c25b5e] font-bold" : "text-gray-500 font-medium"}`}>
+              {row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
