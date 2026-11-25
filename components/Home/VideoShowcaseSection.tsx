@@ -88,7 +88,7 @@ export default function VideoShowcaseSection() {
             {/* Feature List */}
             <div className="mb-6 sm:mb-8 md:mb-10 flex flex-col gap-2.5 sm:gap-3">
               {[
-                "5G prebiotic fiber per can",
+                "6g Prebiotic Fiber per can",
                 "Zero sugar, real fruit juice",
                 "100% recyclable aluminum",
               ].map((item, i) => (

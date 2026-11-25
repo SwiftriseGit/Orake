@@ -4,8 +4,8 @@ import { razorpay } from '@/lib/razorpay';
 
 export async function createRazorpayOrder(amount: number, currency: string = 'INR') {
   try {
-    // Validate amount (in paisa for INR)
-    if (amount < 100) {
+    // Validate amount (in rupees)
+    if (amount < 1) {
       throw new Error('Amount must be at least ₹1');
     }
 

@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Eye, Package, Truck, CheckCircle, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { adminTitleFont as tf, adminTextFont as tx } from "@/lib/fonts";
-import { updateOrderStatus } from "@/actions/admin-orders";
+import { updateOrderStatus, updateOrderPaymentStatus } from "@/actions/admin-orders";
 import type { AdminOrder } from "@/lib/data/admin-orders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useEffect } from "react";
@@ -81,12 +81,35 @@ export default function AdminOrdersClient({
   };
 
   const handleStatusUpdate = (id: string, status: string) => {
-    setOptimisticOrders(prev => prev.map(o => o._id === id ? { ...o, status: status as AdminOrder["status"] } : o));
-    if (viewOrder?._id === id) setViewOrder(p => p ? { ...p, status: status as AdminOrder["status"] } : null);
+    const isDelivered = status === "Delivered";
+    setOptimisticOrders(prev => prev.map(o => o._id === id ? { 
+      ...o, 
+      status: status as AdminOrder["status"],
+      isDelivered,
+      isPaid: isDelivered ? true : o.isPaid 
+    } : o));
+    if (viewOrder?._id === id) {
+      setViewOrder(p => p ? { 
+        ...p, 
+        status: status as AdminOrder["status"],
+        isDelivered,
+        isPaid: isDelivered ? true : p.isPaid 
+      } : null);
+    }
     
     startTransition(async () => {
       await updateOrderStatus(id, status as any);
-     
+    });
+  };
+
+  const handlePaymentToggle = (id: string, currentPaid: boolean) => {
+    const nextPaid = !currentPaid;
+    setOptimisticOrders(prev => prev.map(o => o._id === id ? { ...o, isPaid: nextPaid } : o));
+    if (viewOrder?._id === id) {
+      setViewOrder(p => p ? { ...p, isPaid: nextPaid } : null);
+    }
+    startTransition(async () => {
+      await updateOrderPaymentStatus(id, nextPaid);
     });
   };
 
@@ -213,6 +236,28 @@ export default function AdminOrdersClient({
                   <span className={`${tf.className} text-lg text-[#c25b5e]`}>₹{viewOrder.totalPrice?.toLocaleString("en-IN")}</span>
                 </div>
               </div>
+
+              {/* Payment Status & Toggle */}
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl">
+                <div>
+                  <p className={`${tx.className} text-[10px] text-gray-400 uppercase tracking-widest`}>Payment Method: <span className="font-bold text-[#15161b]">{viewOrder.paymentMethod || "COD"}</span></p>
+                  <p className={`${tx.className} text-xs font-bold mt-0.5 ${viewOrder.isPaid ? "text-green-600" : "text-amber-600"}`}>
+                    {viewOrder.isPaid ? "✓ Paid" : "⏳ Unpaid (COD)"}
+                  </p>
+                </div>
+                <button
+                  disabled={isPending}
+                  onClick={() => handlePaymentToggle(viewOrder._id, viewOrder.isPaid)}
+                  className={`${tx.className} px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border transition-all ${
+                    viewOrder.isPaid
+                      ? "border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100"
+                      : "border-green-200 text-green-700 bg-green-50 hover:bg-green-100"
+                  }`}
+                >
+                  {viewOrder.isPaid ? "Mark Unpaid" : "Mark Paid"}
+                </button>
+              </div>
+
               <div>
                 <p className={`${tx.className} text-[10px] text-gray-400 uppercase tracking-widest mb-2`}>Update Status</p>
                 <div className="flex flex-wrap gap-2">

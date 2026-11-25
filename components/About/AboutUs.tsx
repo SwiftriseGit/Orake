@@ -38,7 +38,7 @@ export default function AboutUs() {
 								alt="Orake Ginger Lemon"
 								className="w-full h-auto object-contain drop-shadow-[0_30px_40px_rgba(219,186,83,0.25)] transform rotate-[9deg]"
 							/>
-							{/* Floating Badge — 5g Prebiotic */}
+							{/* Floating Badge — 6g Prebiotic */}
 							<motion.div
 								initial={{ scale: 0 }}
 								whileInView={{ scale: 1 }}
@@ -46,7 +46,7 @@ export default function AboutUs() {
 								transition={{ duration: 0.6, delay: 0.5, type: "spring", bounce: 0.5 }}
 								className="absolute -bottom-2 -left-2 md:left-0 w-16 h-16 md:w-[76px] md:h-[76px] xl:w-[96px] xl:h-[96px] bg-[#15161b] rounded-full flex flex-col items-center justify-center text-white border-[3px] border-[#e8e8e9] shadow-2xl z-20"
 							>
-								<span className={`${titleFont.className} text-xl md:text-2xl leading-none tracking-widest text-[#dbba53]`}>5G</span>
+								<span className={`${titleFont.className} text-xl md:text-2xl leading-none tracking-widest text-[#dbba53]`}>6G</span>
 								<span className={`${textFont.className} text-[6px] md:text-[7px] font-bold uppercase tracking-[0.15em]`}>Prebiotic</span>
 							</motion.div>
 						</motion.div>
@@ -101,14 +101,14 @@ export default function AboutUs() {
 								Every soda you&apos;ve ever loved was quietly working against you. Sugary crashes, fake health drinks in pastel cans, the same lie in different colors. We were done with it.
 							</p>
 							<p>
-								So we locked ourselves in a lab and rebuilt soda from the inside out — starting with your gut. 47 flavor iterations. Months of microbiome research. The result is Orake: 5G of real prebiotic fiber in every 250ml can, wrapped in flavors so good you&apos;ll forget it&apos;s good for you.
+								So we locked ourselves in a lab and rebuilt soda from the inside out — starting with your gut. 47 flavor iterations. Months of microbiome research. The result is Orake: 6g of real prebiotic fiber in every 250ml can, wrapped in flavors so good you&apos;ll forget it&apos;s good for you.
 							</p>
 						</div>
 
 						{/* Stats */}
 						<div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-black/10">
 							<div className="text-center lg:text-left">
-								<p className={`${titleFont.className} text-4xl md:text-5xl text-[#15161b] mb-1`}>5G</p>
+								<p className={`${titleFont.className} text-4xl md:text-5xl text-[#15161b] mb-1`}>6G</p>
 								<p className={`${textFont.className} text-[10px] md:text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em]`}>Prebiotic Fiber</p>
 							</div>
 							<div className="text-center lg:text-left">

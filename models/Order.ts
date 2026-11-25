@@ -72,4 +72,57 @@ const OrderSchema = new Schema<IOrder>({
     }
 }, { timestamps: true });
 
+OrderSchema.pre("save", function () {
+    if (this.status === "Delivered") {
+        this.isDelivered = true;
+        if (!this.deliveredAt) {
+            this.deliveredAt = new Date();
+        }
+        if (!this.isPaid) {
+            this.isPaid = true;
+            if (!this.paidAt) {
+                this.paidAt = new Date();
+            }
+        }
+    } else {
+        this.isDelivered = false;
+    }
+});
+
+OrderSchema.pre(["findOneAndUpdate", "updateOne", "updateMany"], function () {
+    const update = this.getUpdate() as any;
+    if (!update) return;
+
+    const status = update.status ?? (update.$set && update.$set.status);
+    if (status !== undefined) {
+        if (status === "Delivered") {
+            if (update.$set) {
+                update.$set.isDelivered = true;
+                if (!update.$set.deliveredAt) update.$set.deliveredAt = new Date();
+                if (update.$set.isPaid === undefined) {
+                    update.$set.isPaid = true;
+                    if (!update.$set.paidAt) update.$set.paidAt = new Date();
+                }
+            } else {
+                update.isDelivered = true;
+                if (!update.deliveredAt) update.deliveredAt = new Date();
+                if (update.isPaid === undefined) {
+                    update.isPaid = true;
+                    if (!update.paidAt) update.paidAt = new Date();
+                }
+            }
+        } else {
+            if (update.$set) {
+                update.$set.isDelivered = false;
+            } else {
+                update.isDelivered = false;
+            }
+        }
+    }
+});
+
+if (process.env.NODE_ENV !== "production") {
+    delete (mongoose.models as any).Order;
+}
+
 export const Order = mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);

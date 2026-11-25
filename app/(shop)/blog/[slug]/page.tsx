@@ -22,7 +22,7 @@ const blogData: Record<string, any> = {
         <p>By utilizing real fruit extracts and natural, plant-based sweeteners, we&apos;ve entirely eliminated the sugar crash. Our formula works with your body&apos;s natural metabolic pathways, not against them.</p>
         
         <h2>Prebiotic Fiber: The Unsung Hero</h2>
-        <p>Did you know your gut microbiome plays a massive role in your cognitive function? Orake is packed with 5G of prebiotic fiber that nourishes your gut bacteria. A healthy gut means improved neurotransmitter production, leading to better mood, sharper focus, and stronger immunity. It&apos;s not just a soda; it&apos;s a functional beverage.</p>
+        <p>Did you know your gut microbiome plays a massive role in your cognitive function? Orake is packed with 6g of prebiotic fiber that nourishes your gut bacteria. A healthy gut means improved neurotransmitter production, leading to better mood, sharper focus, and stronger immunity. It&apos;s not just a soda; it&apos;s a functional beverage.</p>
         
         <blockquote>
           &quot;We didn&apos;t just want to make another soda. We wanted to engineer a functional beverage that actually supports your body from the inside out.&quot;<br/>
@@ -53,7 +53,7 @@ const blogData: Record<string, any> = {
         
         <ul>
             <li><strong>The Top Note:</strong> Bright, acidic strawberry that immediately wakes up the palate.</li>
-            <li><strong>The Body:</strong> A clean, lightly carbonated mouthfeel enhanced by our 5G prebiotic fiber blend.</li>
+            <li><strong>The Body:</strong> A clean, lightly carbonated mouthfeel enhanced by our 6g prebiotic fiber blend.</li>
             <li><strong>The Finish:</strong> A lingering, soothing vanilla that leaves you refreshed, not sticky.</li>
         </ul>
         

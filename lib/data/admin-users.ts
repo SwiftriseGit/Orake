@@ -1,10 +1,11 @@
 import "server-only";
 // lib/data/admin-users.ts
-// NO 'use server' — plain async data function (server-only)
-// GET functions must NOT be Server Actions (they'd fire as POST).
-// Only mutations (softDeleteUser, restoreUser) live in actions/admin-users.ts
+// Plain async data function (server-only).
+// GET functions must NOT be Server Actions (Server Actions run as POST).
+// Mutations (softDeleteUser, restoreUser) live in actions/admin-users.ts.
 
 import { getDb } from "@/lib/db";
+import { ObjectId } from "mongodb";
 
 export interface UserFilters {
   search?: string;
@@ -28,6 +29,8 @@ export interface AdminUser {
   createdAt: string;
   updatedAt: string;
   orderCount: number;
+  cartCount: number;
+  wishlistCount: number;
 }
 
 export interface AdminUserStats {
@@ -62,6 +65,8 @@ export async function getAdminUsers(filters: UserFilters = {}): Promise<{ users:
     { $match: match },
     { $lookup: { from: "account", localField: "_id", foreignField: "userId", as: "accounts" } },
     { $lookup: { from: "orders", localField: "_id", foreignField: "userId", as: "orderDocs" } },
+    { $lookup: { from: "carts", localField: "_id", foreignField: "userId", as: "cartDocs" } },
+    { $lookup: { from: "wishlists", localField: "_id", foreignField: "userId", as: "wishlistDocs" } },
     {
       $addFields: {
         provider: {
@@ -71,11 +76,18 @@ export async function getAdminUsers(filters: UserFilters = {}): Promise<{ users:
             else: "credential"
           }
         },
-        orderCount: { $size: "$orderDocs" }
+        orderCount: { $size: "$orderDocs" },
+        cartCount: {
+          $let: {
+            vars: { firstCart: { $arrayElemAt: ["$cartDocs", 0] } },
+            in: { $ifNull: [{ $size: { $ifNull: ["$$firstCart.items", []] } }, 0] }
+          }
+        },
+        wishlistCount: { $size: "$wishlistDocs" }
       }
     },
     ...(provider !== "all" ? [{ $match: { provider } }] : []),
-    { $project: { accounts: 0, orderDocs: 0 } },
+    { $project: { accounts: 0, orderDocs: 0, cartDocs: 0, wishlistDocs: 0 } },
     {
       $facet: {
         total: [{ $count: "count" }],
@@ -96,11 +108,13 @@ export async function getAdminUsers(filters: UserFilters = {}): Promise<{ users:
 
 export async function getUserStats(userId: string): Promise<AdminUserStats> {
   const db = await getDb();
+  const userObjId = ObjectId.isValid(userId) ? new ObjectId(userId) : null;
+  const userQuery = userObjId ? { $in: [userId, userObjId] } : userId;
 
   const [orderCount, cartDoc, wishlistCount] = await Promise.all([
-    db.collection("orders").countDocuments({ userId }),
-    db.collection("carts").findOne({ userId }, { projection: { items: 1 } }),
-    db.collection("wishlists").countDocuments({ userId }),
+    db.collection("orders").countDocuments({ userId: userQuery }),
+    db.collection("carts").findOne({ userId: userQuery }, { projection: { items: 1 } }),
+    db.collection("wishlists").countDocuments({ userId: userQuery }),
   ]);
 
   return {

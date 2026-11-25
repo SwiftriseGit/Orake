@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     q: "What's actually in your drinks?",
-    a: "The good stuff. Full stop. Real fruit juice. 5G of prebiotic fiber per can. Zero artificial sweeteners, zero synthetic colors, zero compromise. If you can't find it in nature, it doesn't find its way into our cans."
+    a: "The good stuff. Full stop. Real fruit juice. 6g of prebiotic fiber per can. Zero artificial sweeteners, zero synthetic colors, zero compromise. If you can't find it in nature, it doesn't find its way into our cans."
   },
   {
     q: "Are the cans recyclable?",

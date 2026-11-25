@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingCart, Heart, Share2, Plus, Minus, ChevronDown, Check, Loader2, Star, StarHalf } from "lucide-react";
+import { ShoppingCart, Heart, Plus, Minus, ChevronDown, Check, Loader2, Star, StarHalf } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { headingFont, bodyFont } from "@/lib/fonts";
 import { StarRating } from "./StarRating";
@@ -260,27 +260,17 @@ export default function ProductInfo({ product, relatedProduct, initialIsWishlist
           </Link>
         </div>
 
-        {/* Shipping & Share Box */}
-        <div className="bg-gray-50/80 p-5 rounded-[24px] border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <span className={`${bodyFont.className} text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em]`}>Share Product</span>
-            <div className="flex gap-2">
-              <button className="w-10 h-10 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-center text-gray-400 hover:text-[#c25b5e] hover:border-[#c25b5e]/20 hover:shadow-[0_8px_20px_rgba(194,91,94,0.08)] transition-all duration-300 hover:-translate-y-0.5">
-                <Share2 size={16} />
-              </button>
-            </div>
-          </div>
-          
-          <div className="w-full h-[1px] bg-gray-200/60 mb-4 rounded-full"></div>
-          
+        {/* Shipping Box */}
+        <div className="bg-gray-50/80 p-5 rounded-[24px] border border-gray-100 flex flex-col justify-center">
+          <p className={`${bodyFont.className} text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4`}>Shipping & Delivery</p>
           <button 
             onClick={() => setShippingOpen(!shippingOpen)}
-            className="flex items-center justify-between group w-full py-1"
+            className="flex items-center justify-between group w-full px-4 py-3 bg-white border border-gray-100 rounded-full shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_20px_rgba(194,91,94,0.08)] hover:border-[#c25b5e]/20 transition-all duration-300"
           >
-            <span className={`${bodyFont.className} text-[11px] font-bold text-[#15161b] uppercase tracking-[0.2em] group-hover:text-[#c25b5e] transition-colors`}>
+            <span className={`${bodyFont.className} text-xs font-bold text-[#15161b] uppercase tracking-widest group-hover:text-[#c25b5e] transition-colors`}>
               Shipping Info
             </span>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300 ${shippingOpen ? 'bg-[#15161b] text-white' : 'bg-white border border-gray-200 text-gray-400 group-hover:border-[#c25b5e] group-hover:text-[#c25b5e]'}`}>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300 ${shippingOpen ? 'bg-[#15161b] text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-[#c25b5e] group-hover:text-white'}`}>
               <ChevronDown size={14} className={`transition-transform duration-300 ${shippingOpen ? 'rotate-180' : ''}`} />
             </div>
           </button>

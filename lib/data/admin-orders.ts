@@ -22,7 +22,11 @@ export interface AdminOrder {
   customerPhone?: string;
   orderItems: { name: string; price: number; quantity: number; image?: string }[];
   totalPrice: number;
+  paymentMethod?: string;
   isPaid: boolean;
+  isDelivered?: boolean;
+  deliveredAt?: string;
+  paidAt?: string;
   status: OrderStatus;
   shippingAddress: { street?: string; city?: string; state?: string; postalCode?: string };
   createdAt: string;

@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Orake — The Soda Your Gut Was Waiting For",
-  description: "Premium prebiotic fiber soda. Zero sugar, real fruit juice, 5G prebiotic fiber per can. Strawberry Vanilla and Ginger Lemon flavors.",
+  description: "Premium prebiotic fiber soda. Zero sugar, real fruit juice, 6g prebiotic fiber per can. Strawberry Vanilla and Ginger Lemon flavors.",
   keywords: "prebiotic fiber soda, zero sugar, gut health, real fruit, Orake",
 };
 

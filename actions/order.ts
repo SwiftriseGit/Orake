@@ -81,7 +81,7 @@ export async function placeOrder(shippingAddress: ShippingAddress & { email?: st
     const orderItems = items.map((item: any) => ({
         name: item.name,
         quantity: item.qty || item.quantity,
-        image: item.image,
+        image: typeof item.image === 'string' ? item.image : (item.image?.url || '/can1.png'),
         price: item.price,
         productId: item.id || item.productId || item._id
     }));

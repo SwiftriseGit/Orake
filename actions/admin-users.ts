@@ -1,6 +1,6 @@
 'use server';
-// MUTATIONS + thin GET wrappers for client components.
-// Types are NOT re-exported here — import them from @/lib/data/admin-users directly.
+// MUTATIONS ONLY. In Next.js App Router, Server Actions must ONLY be used for mutations (POST).
+// Data fetching (GET) belongs in lib/data/ (Server Components) or Route Handlers (app/api/...).
 
 import { getDb, connectDB } from "@/lib/db";
 import { Cart } from "@/models/Cart";
@@ -8,17 +8,6 @@ import { Wishlist } from "@/models/Wishlist";
 import { Address } from "@/models/Address";
 import { ObjectId } from "mongodb";
 import { updateTag } from "next/cache";
-import {
-  getAdminUsers as _getAdminUsers,
-  getUserStats as _getUserStats,
-} from "@/lib/data/admin-users";
-import type { UserFilters, AdminUser, AdminUserStats } from "@/lib/data/admin-users";
-
-
-
-export  async function getUserStats(userId: string): Promise<AdminUserStats> {
-  return _getUserStats(userId);
-}
 
 export async function softDeleteUser(userId: string): Promise<{ success: boolean; message: string }> {
   try {

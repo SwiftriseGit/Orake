@@ -31,23 +31,32 @@ export default function ProductTabs({ product, reviews }: ProductTabsProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 mb-24 relative mt-10">
-      <div className="flex items-center gap-8 border-b border-gray-100 mb-10">
+      <div className="flex items-center gap-6 sm:gap-8 border-b border-gray-100 mb-10 overflow-x-auto overflow-y-hidden md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <button
           onClick={() => setActiveTab("description")}
-          className={`${headingFont.className} text-xl sm:text-2xl uppercase tracking-wider pb-4 transition-colors relative ${activeTab === "description" ? "text-[#15161b]" : "text-gray-400 hover:text-[#15161b]"}`}
+          className={`${headingFont.className} text-xl sm:text-2xl uppercase tracking-wider pb-4 transition-colors relative whitespace-nowrap ${activeTab === "description" ? "text-[#15161b]" : "text-gray-400 hover:text-[#15161b]"}`}
         >
           Description
           {activeTab === "description" && (
-            <motion.div layoutId="tab-indicator" className="absolute bottom-[-1px] left-0 w-full h-[3px] bg-[#c25b5e]" />
+            <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 w-full h-[3px] bg-[#c25b5e]" />
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("nutrition")}
+          className={`${headingFont.className} text-xl sm:text-2xl uppercase tracking-wider pb-4 transition-colors relative whitespace-nowrap ${activeTab === "nutrition" ? "text-[#15161b]" : "text-gray-400 hover:text-[#15161b]"}`}
+        >
+          Nutrition Facts
+          {activeTab === "nutrition" && (
+            <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 w-full h-[3px] bg-[#c25b5e]" />
           )}
         </button>
         <button
           onClick={() => setActiveTab("reviews")}
-          className={`${headingFont.className} text-xl sm:text-2xl uppercase tracking-wider pb-4 transition-colors relative ${activeTab === "reviews" ? "text-[#15161b]" : "text-gray-400 hover:text-[#15161b]"}`}
+          className={`${headingFont.className} text-xl sm:text-2xl uppercase tracking-wider pb-4 transition-colors relative whitespace-nowrap ${activeTab === "reviews" ? "text-[#15161b]" : "text-gray-400 hover:text-[#15161b]"}`}
         >
           Customer Reviews
           {activeTab === "reviews" && (
-            <motion.div layoutId="tab-indicator" className="absolute bottom-[-1px] left-0 w-full h-[3px] bg-[#c25b5e]" />
+            <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 w-full h-[3px] bg-[#c25b5e]" />
           )}
         </button>
       </div>
@@ -65,6 +74,120 @@ export default function ProductTabs({ product, reviews }: ProductTabsProps) {
               <p>{product.description}</p>
               <p>How does it taste then? Delightfully tasty! Sweetened with real fruit extracts only, it&apos;s a supercool and healthier alternative to regular sodas. You can enjoy it anytime, whether you&apos;re watching a movie, partying, or simply hanging out with friends.</p>
               <p>So, if you want to savor the classic taste sans the sugar, make a smart choice today. Order Orake {product.name} to enjoy all the fizz and flavor, and say goodbye to all the guilt.</p>
+
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className={`${headingFont.className} text-xl sm:text-2xl text-[#15161b] uppercase tracking-wide mb-4`}>
+                  Nutrition Facts
+                </h3>
+                <ul className="space-y-3 max-w-md">
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">6g Prebiotic Fiber</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Natural Flavors</span>
+                  </li>
+                  <li className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                      <span className="font-medium text-[#15161b]">With Vitamins:</span>
+                    </div>
+                    <ul className="pl-6 space-y-2 text-sm text-gray-600">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B2 – 2.5 mg</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B6 – 1.1 mg</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B12 – 0.50 mg</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">100% Plant Based</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Zero Calories</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Vegan</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">No Added Sugar</span>
+                  </li>
+                </ul>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "nutrition" && (
+            <motion.div
+              key="nutrition"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`${bodyFont.className} text-gray-500 leading-relaxed max-w-4xl text-[15px] sm:text-base space-y-6`}
+            >
+              <div>
+                <h3 className={`${headingFont.className} text-2xl sm:text-3xl text-[#15161b] uppercase tracking-wide mb-4`}>
+                  Nutrition Facts
+                </h3>
+                <ul className="space-y-3 max-w-md">
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">6g Prebiotic Fiber</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Natural Flavors</span>
+                  </li>
+                  <li className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                      <span className="font-medium text-[#15161b]">With Vitamins:</span>
+                    </div>
+                    <ul className="pl-6 space-y-2 text-sm text-gray-600">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B2 – 2.5 mg</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B6 – 1.1 mg</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                        <span>Vitamin B12 – 0.50 mg</span>
+                      </li>
+                    </ul>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">100% Plant Based</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Zero Calories</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">Vegan</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-[#c25b5e]" />
+                    <span className="font-medium text-[#15161b]">No Added Sugar</span>
+                  </li>
+                </ul>
+              </div>
             </motion.div>
           )}
 

@@ -17,5 +17,9 @@ export const OrderItemSchema = new Schema<IOrderItem>({
     name: { type: String, required: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
-    image: { type: String, required: true },
+    image: { 
+        type: String, 
+        required: true,
+        set: (val: any) => (typeof val === 'string' ? val : val?.url || '')
+    },
 });

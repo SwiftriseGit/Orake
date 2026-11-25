@@ -74,7 +74,7 @@ export default function AdminSettingsPage() {
             </div>
             <div>
               <label className={`${textFont.className} block text-xs font-semibold uppercase tracking-[0.2em] text-gray-400 mb-2`}>Store Description</label>
-              <textarea rows={3} defaultValue="Premium prebiotic fiber soda. Zero sugar, real fruit juice, 5G prebiotic fiber per can."
+              <textarea rows={3} defaultValue="Premium prebiotic fiber soda. Zero sugar, real fruit juice, 6g prebiotic fiber per can."
                 className={`${textFont.className} w-full border-2 border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15161b] focus:border-[#c25b5e] focus:bg-white focus:outline-none transition-all rounded-xl resize-none`}
               />
             </div>

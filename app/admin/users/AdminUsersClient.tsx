@@ -3,8 +3,8 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Eye, X, Loader2, Trash2, RotateCcw, ShieldAlert, Phone, Mail, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { adminTitleFont as tf, adminTextFont as tx } from "@/lib/fonts";
-import { getUserStats, softDeleteUser, restoreUser } from "@/actions/admin-users";
-import type { AdminUser, AdminUserStats } from "@/lib/data/admin-users";
+import { softDeleteUser, restoreUser } from "@/actions/admin-users";
+import type { AdminUser } from "@/lib/data/admin-users";
 import { useDebounce } from "@/hooks/useDebounce";
 
 function ProviderBadge({ provider }: { provider?: string }) {
@@ -73,8 +73,6 @@ export default function AdminUsersClient({
   const debouncedSearch = useDebounce(searchValue, 350);
 
   const [viewUser, setViewUser] = useState<AdminUser | null>(null);
-  const [userStats, setUserStats] = useState<AdminUserStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -112,13 +110,8 @@ export default function AdminUsersClient({
     }
   };
 
-  const openDetail = async (user: AdminUser) => {
+  const openDetail = (user: AdminUser) => {
     setViewUser(user);
-    setUserStats(null);
-    setStatsLoading(true);
-    const stats = await getUserStats(user._id.toString());
-    setUserStats(stats);
-    setStatsLoading(false);
   };
 
   const confirmDoDelete = () => {
@@ -324,22 +317,18 @@ export default function AdminUsersClient({
               </div>
               <div>
                 <p className={`${tx.className} text-[10px] text-gray-400 uppercase tracking-widest mb-2`}>Activity</p>
-                {statsLoading ? (
-                  <div className="flex items-center gap-2 text-gray-400 py-2"><Loader2 size={14} className="animate-spin" /><span className={`${tx.className} text-xs`}>Loading…</span></div>
-                ) : (
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: "Orders", value: userStats?.orderCount ?? viewUser.orderCount },
-                      { label: "Cart", value: userStats?.cartCount ?? 0 },
-                      { label: "Wishlist", value: userStats?.wishlistCount ?? 0 },
-                    ].map(s => (
-                      <div key={s.label} className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                        <p className={`${tf.className} text-2xl text-[#15161b]`}>{s.value}</p>
-                        <p className={`${tx.className} text-[9px] text-gray-400 uppercase tracking-widest mt-0.5`}>{s.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "Orders", value: viewUser.orderCount ?? 0 },
+                    { label: "Cart", value: viewUser.cartCount ?? 0 },
+                    { label: "Wishlist", value: viewUser.wishlistCount ?? 0 },
+                  ].map(s => (
+                    <div key={s.label} className="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
+                      <p className={`${tf.className} text-2xl text-[#15161b]`}>{s.value}</p>
+                      <p className={`${tx.className} text-[9px] text-gray-400 uppercase tracking-widest mt-0.5`}>{s.label}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="bg-gray-50 rounded-2xl p-4">
                 <p className={`${tx.className} text-[9px] text-gray-400 uppercase tracking-widest mb-1`}>User ID</p>
