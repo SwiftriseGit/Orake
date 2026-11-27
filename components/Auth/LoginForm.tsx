@@ -46,22 +46,17 @@ export default function LoginForm() {
             error.message?.toLowerCase().includes("verif"));
 
         if (isUnverified) {
-          toast.error("Please verify your email first. Sending a verification code...");
           try {
             const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
               email: data.email,
               type: "email-verification",
             });
             if (otpError) {
-              const msg = getAuthErrorMessage(otpError, "Could not send verification code.");
-              setFormError(msg);
-              toast.error(msg);
+              setFormError(getAuthErrorMessage(otpError, "Could not send verification code."));
               return;
             }
           } catch (otpErr) {
-            const msg = getAuthErrorMessage(otpErr, "Could not send verification code.");
-            setFormError(msg);
-            toast.error(msg);
+            setFormError(getAuthErrorMessage(otpErr, "Could not send verification code."));
             return;
           }
           setOtpEmail(data.email);
@@ -69,17 +64,13 @@ export default function LoginForm() {
           return;
         }
 
-        const msg = getAuthErrorMessage(error, "Invalid email or password. Please try again.");
-        setFormError(msg);
-        toast.error(msg);
+        setFormError(getAuthErrorMessage(error, "Invalid email or password. Please try again."));
         return;
       }
 
       if ((signInData?.user as any)?.isDelete) {
         await authClient.signOut();
-        const msg = "Your account has been deactivated. Please contact support.";
-        setFormError(msg);
-        toast.error(msg);
+        setFormError("Your account has been deactivated. Please contact support.");
         return;
       }
 
@@ -101,13 +92,12 @@ export default function LoginForm() {
       router.push(redirectUrl || "/");
       router.refresh();
     } catch (error) {
-      const msg = getAuthErrorMessage(error, "Unable to sign in. Please check your credentials and try again.");
-      setFormError(msg);
-      toast.error(msg);
+      setFormError(getAuthErrorMessage(error, "Unable to sign in. Please check your credentials and try again."));
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setFormError("");
     setGoogleLoading(true);
     try {
       await authClient.signIn.social({
@@ -115,8 +105,8 @@ export default function LoginForm() {
         callbackURL: "/",
       });
       // the callbackURL handles closing/redirecting naturally or triggers a reload.
-    } catch {
-      toast.error("Google sign-in failed");
+    } catch (err) {
+      setFormError(getAuthErrorMessage(err, "Google sign-in failed. Please try again."));
       setGoogleLoading(false);
     }
   };

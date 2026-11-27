@@ -21,6 +21,7 @@ export default function SignupForm() {
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [viewingPolicies, setViewingPolicies] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const { setAuthModalView, closeAuthModal, setOtpEmail } = useAuthStore();
 
   const {
@@ -33,6 +34,7 @@ export default function SignupForm() {
   });
 
   const onSubmit = async (data: signupFormType) => {
+    setFormError("");
     try {
       const { data: signUpData, error } = await authClient.signUp.email({
         name: data.fullname,
@@ -42,11 +44,11 @@ export default function SignupForm() {
       });
 
       if (error?.status === 422) {
-        toast.error("Email already registered");
+        setFormError("Email already registered");
         return;
       }
       if (error) {
-        toast.error(getAuthErrorMessage(error, "Signup failed. Please check your details and try again."));
+        setFormError(getAuthErrorMessage(error, "Signup failed. Please check your details and try again."));
         return;
       }
 
@@ -54,19 +56,20 @@ export default function SignupForm() {
       setOtpEmail(data.email);
       setAuthModalView("verify-otp");
     } catch (error) {
-      toast.error(getAuthErrorMessage(error, "Unable to create your account right now. Please try again."));
+      setFormError(getAuthErrorMessage(error, "Unable to create your account right now. Please try again."));
     }
   };
 
   const handleGoogleSignUp = async () => {
+    setFormError("");
     setGoogleLoading(true);
     try {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/",
       });
-    } catch {
-      toast.error("Google sign-up failed");
+    } catch (err) {
+      setFormError(getAuthErrorMessage(err, "Google sign-up failed. Please try again."));
       setGoogleLoading(false);
     }
   };
@@ -279,6 +282,12 @@ export default function SignupForm() {
                 I agree to the <button type="button" onClick={(e) => { e.preventDefault(); setViewingPolicies(true); }} className="text-[#c25b5e] hover:text-[#15161b] transition-colors font-semibold">Terms and Policies</button>
               </span>
             </label>
+
+            {formError && (
+              <div className={`${textFont.className} bg-red-50 border border-red-200 text-red-600 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium`}>
+                {formError}
+              </div>
+            )}
 
             {/* Submit */}
             <button
