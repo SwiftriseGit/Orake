@@ -9,7 +9,7 @@ import type { loginFormType } from "@/types/loginFormType"
 import { loginFormSchema } from "@/types/loginFormType"
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import SlideToGoogle from "@/components/SlideToGoogle";
 import { useAuthStore } from "@/store/useAuthStore";
 import { titleFont, textFont } from "@/lib/fonts";
@@ -24,6 +24,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [showPass, setShowPass] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const { setAuthModalView, closeAuthModal, setOtpEmail } = useAuthStore();
 
   const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<loginFormType>({
@@ -31,6 +32,7 @@ export default function LoginForm() {
   })
 
   const onSubmit = async (data: loginFormType) => {
+    setFormError("");
     try {
       const { data: signInData, error } = await authClient.signIn.email({
         email: data.email,
@@ -38,36 +40,60 @@ export default function LoginForm() {
       });
 
       if (error) {
-        // 403 = email not verified
-        if (error.status === 403) {
-          toast.error("Please verify your email first.");
+        const isUnverified =
+          error.code === "EMAIL_NOT_VERIFIED" ||
+          (error.status === 403 &&
+            error.message?.toLowerCase().includes("verif"));
 
-          await authClient.emailOtp.sendVerificationOtp({
-            email: data.email,
-            type: "email-verification",
-          });
+        if (isUnverified) {
+          toast.error("Please verify your email first. Sending a verification code...");
+          try {
+            const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
+              email: data.email,
+              type: "email-verification",
+            });
+            if (otpError) {
+              const msg = getAuthErrorMessage(otpError, "Could not send verification code.");
+              setFormError(msg);
+              toast.error(msg);
+              return;
+            }
+          } catch (otpErr) {
+            const msg = getAuthErrorMessage(otpErr, "Could not send verification code.");
+            setFormError(msg);
+            toast.error(msg);
+            return;
+          }
           setOtpEmail(data.email);
           setAuthModalView("verify-otp");
           return;
         }
 
-        toast.error(error.message || "Invalid email or password");
+        const msg = getAuthErrorMessage(error, "Invalid email or password. Please try again.");
+        setFormError(msg);
+        toast.error(msg);
         return;
       }
 
       if ((signInData?.user as any)?.isDelete) {
         await authClient.signOut();
-        toast.error("Your account has been deleted. Please contact support.");
+        const msg = "Your account has been deactivated. Please contact support.";
+        setFormError(msg);
+        toast.error(msg);
         return;
       }
 
-      // Sync guest data → user account (wishlist + cart)
-      const guestSlugs = useGuestWishlistStore.getState().getSlugs();
-      await Promise.all([
-        guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
-        syncGuestCartToUser(),
-      ]);
-      useGuestWishlistStore.getState().clear();
+      // Sync guest data → user account (wishlist + cart), non-blocking so login still completes
+      try {
+        const guestSlugs = useGuestWishlistStore.getState().getSlugs();
+        await Promise.all([
+          guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
+          syncGuestCartToUser(),
+        ]);
+        useGuestWishlistStore.getState().clear();
+      } catch (syncErr) {
+        console.error("Guest sync failed after login:", syncErr);
+      }
 
       toast.success("Welcome back!");
       closeAuthModal();
@@ -75,7 +101,9 @@ export default function LoginForm() {
       router.push(redirectUrl || "/");
       router.refresh();
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      const msg = getAuthErrorMessage(error, "Unable to sign in. Please check your credentials and try again.");
+      setFormError(msg);
+      toast.error(msg);
     }
   };
 
@@ -175,6 +203,12 @@ export default function LoginForm() {
                 Forgot Password?
               </button>
             </div>
+
+            {formError && (
+              <div className={`${textFont.className} bg-red-50 border border-red-200 text-red-600 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium`}>
+                {formError}
+              </div>
+            )}
 
             {/* Submit */}
             <button

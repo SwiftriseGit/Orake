@@ -16,12 +16,16 @@ export default function PasskeyGate({ children }: { children: React.ReactNode })
     e.preventDefault();
     setError("");
     startTransition(async () => {
-      const res = await verifyAdminPasskey(key);
-      if (res.success) {
-        setUnlocked(true);
-      } else {
-        setError("Invalid passkey. Access denied.");
-        setKey("");
+      try {
+        const res = await verifyAdminPasskey(key);
+        if (res.success) {
+          setUnlocked(true);
+        } else {
+          setError(res.error || "Invalid passkey. Please check and try again.");
+          setKey("");
+        }
+      } catch (err: any) {
+        setError(err?.message || "Unable to verify passkey. Please try again.");
       }
     });
   };

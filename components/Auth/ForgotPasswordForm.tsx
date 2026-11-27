@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Mail, ArrowLeft, CheckCircle, Lock, Eye, EyeOff, Loader2, Circle } from "lucide-react";
 import { titleFont, textFont } from "@/lib/fonts";
 import { useAuthStore } from "@/store/useAuthStore";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 export default function ForgotPasswordForm() {
@@ -41,14 +41,14 @@ export default function ForgotPasswordForm() {
       });
       
       if (error) {
-        toast.error(error.message || "Failed to send reset code.");
+        toast.error(getAuthErrorMessage(error, "Failed to send reset code. Please check your email."));
       } else {
         toast.success("Reset code sent to your email.");
         setStep("reset");
         setResendCooldown(60);
       }
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error(getAuthErrorMessage(err, "Unable to send reset code. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -75,13 +75,13 @@ export default function ForgotPasswordForm() {
       });
       
       if (error) {
-        toast.error(error.message || "Failed to reset password. Invalid or expired code.");
+        toast.error(getAuthErrorMessage(error, "Failed to reset password. Invalid or expired code."));
       } else {
         toast.success("Password reset successfully!");
         setStep("success");
       }
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error(getAuthErrorMessage(err, "Failed to reset password. Please try again."));
     } finally {
       setLoading(false);
     }

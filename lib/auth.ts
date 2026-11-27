@@ -18,17 +18,71 @@ export const auth = betterAuth({
   emailVerification: {
     autoSignInAfterVerification: true,
   },
-// ─── ADD THIS HOOK ───
+// ─── AUTH HOOKS ───
 	hooks: {
 		before: createAuthMiddleware(async (ctx) => {
-			// Check if user already exists during sign-up
+			const email = ctx.body?.email;
+			if (!email || typeof email !== "string") return;
+
+			// 1. Sign-up duplicate / deactivated check
 			if (ctx.path === "/sign-up/email") {
-				const existingUser = await ctx.context.internalAdapter.findUserByEmail(
-					ctx.body.email
-				);
-				if (existingUser) {
+				const existing = await ctx.context.internalAdapter.findUserByEmail(email);
+				if (existing) {
+					if ((existing.user as any)?.isDelete) {
+						throw new APIError("FORBIDDEN", {
+							message: "This account has been deactivated. Please contact support.",
+						});
+					}
 					throw new APIError("UNPROCESSABLE_ENTITY", {
 						message: "Email already registered",
+					});
+				}
+			}
+
+			// 2. Sign-in validation: missing account, deactivated account, or Google-only account
+			if (ctx.path === "/sign-in/email") {
+				const existing = await ctx.context.internalAdapter.findUserByEmail(email, {
+					includeAccounts: true,
+				});
+				if (!existing) {
+					throw new APIError("UNAUTHORIZED", {
+						message: "No account found with this email address. Please sign up first.",
+					});
+				}
+				if ((existing.user as any)?.isDelete) {
+					throw new APIError("FORBIDDEN", {
+						message: "Your account has been deactivated. Please contact support.",
+					});
+				}
+				const accounts = existing.accounts ?? [];
+				const hasCredential = accounts.some((acc: any) => acc.providerId === "credential");
+				if (accounts.length > 0 && !hasCredential) {
+					throw new APIError("BAD_REQUEST", {
+						message: "This email is registered with Google Sign-In. Please continue with Google.",
+					});
+				}
+			}
+
+			// 3. Forgot-password OTP checks
+			if (ctx.path === "/email-otp/send-verification-otp" && ctx.body?.type === "forget-password") {
+				const existing = await ctx.context.internalAdapter.findUserByEmail(email, {
+					includeAccounts: true,
+				});
+				if (!existing) {
+					throw new APIError("NOT_FOUND", {
+						message: "No account found with this email address.",
+					});
+				}
+				if ((existing.user as any)?.isDelete) {
+					throw new APIError("FORBIDDEN", {
+						message: "Your account has been deactivated. Please contact support.",
+					});
+				}
+				const accounts = existing.accounts ?? [];
+				const hasCredential = accounts.some((acc: any) => acc.providerId === "credential");
+				if (accounts.length > 0 && !hasCredential) {
+					throw new APIError("BAD_REQUEST", {
+						message: "This account uses Google Sign-In and does not have a password to reset.",
 					});
 				}
 			}

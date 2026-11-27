@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Lock, Eye, EyeOff, Loader2, AlertTriangle } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { titleFont, textFont } from "@/lib/fonts";
 
@@ -39,13 +39,12 @@ export default function SettingsTab() {
       });
 
       if (error) {
-        if (error.code === "INVALID_PASSWORD" || error.status === 400 || error.message?.toLowerCase().includes("password")) {
-          // If the password is wrong, the user requested it to say "user not found" or similar
-          toast.error("User not found or incorrect password");
-        } else if (error.code === "NO_PASSWORD" || error.message?.toLowerCase().includes("oauth") || error.message?.toLowerCase().includes("provider")) {
-          toast.error("Google users cannot update password");
+        if (error.code === "INVALID_PASSWORD" || error.message?.toLowerCase().includes("invalid password") || error.message?.toLowerCase().includes("incorrect")) {
+          toast.error("Current password is incorrect. Please try again.");
+        } else if (error.code === "NO_PASSWORD" || error.code === "CREDENTIAL_ACCOUNT_NOT_FOUND" || error.message?.toLowerCase().includes("oauth") || error.message?.toLowerCase().includes("provider")) {
+          toast.error("Google sign-in accounts cannot update password here.");
         } else {
-          toast.error("Google users cannot update password"); 
+          toast.error(getAuthErrorMessage(error, "Failed to change password. Please try again."));
         }
         return;
       }
@@ -55,8 +54,8 @@ export default function SettingsTab() {
         await authClient.signOut();
         window.location.href = "/login";
       }, 1500);
-    } catch {
-      toast.error("Something went wrong");
+    } catch (err) {
+      toast.error(getAuthErrorMessage(err, "Failed to change password. Please try again."));
     } finally {
       setChangingPassword(false);
     }
@@ -68,7 +67,7 @@ export default function SettingsTab() {
       const { error } = await authClient.deleteUser();
 
       if (error) {
-        toast.error(error.message || "Failed to delete account");
+        toast.error(getAuthErrorMessage(error, "Failed to delete account."));
       } else {
         toast.success("Account deleted. Goodbye!");
         setTimeout(async () => {
@@ -76,8 +75,8 @@ export default function SettingsTab() {
           window.location.href = "/";
         }, 1500);
       }
-    } catch {
-      toast.error("Something went wrong");
+    } catch (err) {
+      toast.error(getAuthErrorMessage(err, "Failed to delete account. Please try again."));
     } finally {
       setDeleting(false);
       setShowDeleteConfirm(false);

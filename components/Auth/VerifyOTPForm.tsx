@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { titleFont, textFont } from "@/lib/fonts";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { syncGuestWishlist } from "@/actions/wishlist";
@@ -79,15 +79,19 @@ export default function VerifyOTPForm() {
       });
 
       if (error) {
-        toast.error(error.message || "Invalid OTP. Please try again.");
+        toast.error(getAuthErrorMessage(error, "Invalid verification code. Please try again."));
       } else {
-        // Sync guest data → user account (wishlist + cart)
-        const guestSlugs = useGuestWishlistStore.getState().getSlugs();
-        await Promise.all([
-          guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
-          syncGuestCartToUser(),
-        ]);
-        useGuestWishlistStore.getState().clear();
+        // Sync guest data → user account (wishlist + cart), non-blocking
+        try {
+          const guestSlugs = useGuestWishlistStore.getState().getSlugs();
+          await Promise.all([
+            guestSlugs.length > 0 ? syncGuestWishlist(guestSlugs) : Promise.resolve(),
+            syncGuestCartToUser(),
+          ]);
+          useGuestWishlistStore.getState().clear();
+        } catch (syncErr) {
+          console.error("Guest sync failed after verification:", syncErr);
+        }
 
         toast.success("Email verified! Signing you in...");
         closeAuthModal();
@@ -95,7 +99,7 @@ export default function VerifyOTPForm() {
         router.refresh();
       }
     } catch (error) {
-      toast.error("Something went wrong");
+      toast.error(getAuthErrorMessage(error, "Could not verify OTP. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -112,7 +116,7 @@ export default function VerifyOTPForm() {
       });
 
       if (error) {
-        toast.error(error.message || "Failed to resend OTP");
+        toast.error(getAuthErrorMessage(error, "Failed to resend verification code."));
       } else {
         toast.success("New OTP sent to your email!");
         setResendCooldown(60);
@@ -120,7 +124,7 @@ export default function VerifyOTPForm() {
         inputsRef.current[0]?.focus();
       }
     } catch (error) {
-      toast.error("Failed to resend OTP");
+      toast.error(getAuthErrorMessage(error, "Failed to resend verification code."));
     } finally {
       setResendLoading(false);
     }

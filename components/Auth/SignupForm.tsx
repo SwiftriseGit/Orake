@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupformSchema } from "@/types/signupFormType";
 import type { signupFormType } from "@/types/signupFormType";
-import { authClient } from "@/lib/auth-client";
+import { authClient, getAuthErrorMessage } from "@/lib/auth-client";
 import SlideToGoogle from "@/components/SlideToGoogle";
 import { useAuthStore } from "@/store/useAuthStore";
 import { titleFont, textFont } from "@/lib/fonts";
@@ -46,7 +46,7 @@ export default function SignupForm() {
         return;
       }
       if (error) {
-        toast.error(error.message || "Signup failed. Please try again.");
+        toast.error(getAuthErrorMessage(error, "Signup failed. Please check your details and try again."));
         return;
       }
 
@@ -54,7 +54,7 @@ export default function SignupForm() {
       setOtpEmail(data.email);
       setAuthModalView("verify-otp");
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(getAuthErrorMessage(error, "Unable to create your account right now. Please try again."));
     }
   };
 
