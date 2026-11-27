@@ -117,11 +117,22 @@ export default function Footer() {
       </div>
 
       {/* Bottom Copyright */}
-      <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-16 lg:px-28 pt-6 pb-8 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-4 z-20 text-center md:text-left">
+      <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-16 lg:px-28 pt-6 pb-8 flex flex-col md:flex-row justify-between items-center gap-4 z-20 text-center md:text-left">
         <p className={`${textFont.className} text-sm text-white/80 font-medium tracking-wide`}>
-          © 2026 <a href="https://swiftrise.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/30 hover:decoration-white">Swiftrise Solution Pvt Ltd</a>. ALL RIGHTS RESERVED.
+          © 2026 Lakshson PVT Ltd. ALL RIGHTS RESERVED.
         </p>
-
+        <p className={`${textFont.className} text-sm text-white/80 font-medium tracking-wide`}>
+          Built by{" "}
+          <a
+            href="https://swiftrise.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors underline underline-offset-4 decoration-white/30 hover:decoration-white"
+          >
+            Swiftrise Solution Pvt Ltd
+          </a>
+          .
+        </p>
       </div>
 
     </footer>
